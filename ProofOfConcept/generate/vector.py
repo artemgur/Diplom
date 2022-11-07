@@ -4,10 +4,10 @@ import random
 import numpy as np
 import pandas as pd
 
-import utilities
+from . import utilities
 
 
-def random_row(length, multiplier=1):
+def random_row(length, multiplier=10):
     return np.random.randn(length) * multiplier
 
 

@@ -1,8 +1,11 @@
 from collections import defaultdict
 
 import numpy as np
+import pandas as pd
 from scipy.interpolate import RegularGridInterpolator
 
+from category_encoder import CategoryEncoder
+from category_extrapolator import CategoryExtrapolator
 from utilities import n_values_with_step
 
 
@@ -28,6 +31,26 @@ def extrapolate_matrix(matrix, seconds_before_extrapolation, seconds_between_sna
     extrapolated_row = interp(points_to_calculate)
     return extrapolated_row
 
+
+def extrapolate_categorical_matrix(matrix: pd.DataFrame, seconds_before_extrapolation, seconds_between_snapshots):
+    cat_encoder = CategoryEncoder()
+    cat_encoder_result = cat_encoder.fit(matrix).encode(matrix)
+    cat_encoder_extrapolation = extrapolate_matrix(cat_encoder_result.values, seconds_between_snapshots, seconds_before_extrapolation)
+    #print(cat_encoder_extrapolation)
+    cat_encoder_extrapolation_df = pd.DataFrame(cat_encoder_extrapolation[None, :], columns=list(cat_encoder_result.columns))
+    cat_encoder_extrapolation_decoded = cat_encoder.decode(cat_encoder_extrapolation_df)
+
+    non_correlated_columns = cat_encoder.not_correlated_columns
+    non_correlated_extrapolations = []
+    for non_correlated_column in non_correlated_columns:
+        cat_extrapolator = CategoryExtrapolator(seconds_between_snapshots)
+        extrapolation = cat_extrapolator.fit(matrix[non_correlated_column]).extrapolate(matrix[non_correlated_column].iloc[-1], seconds_before_extrapolation)
+        non_correlated_extrapolations.append(extrapolation)
+    non_correlated_extrapolations_df = pd.DataFrame(non_correlated_extrapolations, columns=non_correlated_columns)
+    extrapolation_result = pd.concat((cat_encoder_extrapolation_decoded, non_correlated_extrapolations_df), axis=1)
+    return extrapolation_result
+    #return pd.DataFrame(cat_encoder_extrapolation_decoded.append(non_correlated_extrapolations),
+    #                    columns=list(cat_encoder_extrapolation_decoded.columns).extend(non_correlated_columns))
 
 
 

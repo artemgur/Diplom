@@ -1,7 +1,7 @@
 import numpy as np
 
-from matrix import random_matrix
-import row_change_function as rcf
+from .matrix import random_matrix
+from . import row_change_function as rcf
 
 
 
@@ -15,7 +15,7 @@ def generate_next(previous_data, description, row_change_function):
     previous_data.append(next_)
 
 
-def generate(count, shape, multiplier=1, row_change_function=rcf.linear):
+def generate(count, shape, multiplier=10, row_change_function=rcf.linear):
     start = random_matrix(shape, multiplier)
     description = random_matrix(shape)
     data = [start]
