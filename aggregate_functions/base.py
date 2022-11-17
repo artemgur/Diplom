@@ -1,7 +1,10 @@
 from typing import Iterable
 
+from .utilities import utilities
+
 
 class Aggregate:
+    # TODO mirror constructor arguments changes to subclasses
     def __init__(self, state=None, row_cache=None):
         self._initial_state = state  # TODO init this variable only if it will be actually used later?
         self._state = state
@@ -34,4 +37,16 @@ class Aggregate:
         # TODO remove value from row cache here or assume it was already removed?
         self._reset_state()
         self.add_values(self._row_cache)
+
+    # By default, function name is the class name converted to snake_case
+    # Can be overriden in subclasses to change the function name
+    @classmethod
+    def function_name(cls):
+        return utilities.to_snake_case(cls.__name__)
+
+    # Needed to make "abstract" subclasses in hierarchy
+    # TODO but base class should be "abstract", but is_function returns True for it!
+    # @classmethod
+    # def is_function(cls):
+    #     return True
 
