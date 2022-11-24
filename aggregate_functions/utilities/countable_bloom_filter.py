@@ -74,4 +74,5 @@ def get_optimal_hash_functions_count(length: int, expected_elements_count: int) 
 
 
 def get_optimal_length(expected_elements_count, false_positive_probability):
-    return math.ceil(expected_elements_count * math.log(false_positive_probability) / (math.log(1 / 2 ** math.log(2))))
+    #return math.ceil(expected_elements_count * math.log(false_positive_probability) / (math.log(1 / 2 ** math.log(2))))
+    return math.ceil(- expected_elements_count * math.log(false_positive_probability) / (math.log(2) ** 2))

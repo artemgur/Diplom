@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from .utilities import utilities
+from utilities import utilities
 
 
 class Aggregate:
@@ -38,11 +38,20 @@ class Aggregate:
         self._reset_state()
         self.add_values(self._row_cache)
 
+    @classmethod
+    def has_delete(cls):
+        return not cls.remove_value == Aggregate.remove_value
+
+    @classmethod
+    def has_combine(cls):
+        return not cls.combine == Aggregate.combine
+
+
     # By default, function name is the class name converted to snake_case
     # Can be overriden in subclasses to change the function name
     @classmethod
     def function_name(cls):
-        return utilities.to_snake_case(cls.__name__)
+        return utilities.classname_to_snake_case(cls)
 
     # Needed to make "abstract" subclasses in hierarchy
     # TODO but base class should be "abstract", but is_function returns True for it!

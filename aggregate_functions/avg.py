@@ -1,7 +1,7 @@
 from . import Aggregate
 
 
-class Average(Aggregate):
+class Avg(Aggregate):
     def __init__(self, state=(0, 0)):
         super().__init__(state=state)
 
@@ -13,5 +13,7 @@ class Average(Aggregate):
 
     def get_result(self):
         return self._state[0] / self._state[1]
+
+
 
     # TODO remove_value
