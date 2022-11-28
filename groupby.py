@@ -8,7 +8,7 @@ class Groupby:
     # _groupby_rows – dict. Key – tuple of values of groupby columns, values – list of aggregate functions
     def __init__(self, groupby_columns, agg_list_initializer, column_names):
         self._column_names = column_names  # TODO
-        self._agg_list_initializer = agg_list_initializer # TODO one column can have multiple aggregates
+        self._agg_list_initializer = agg_list_initializer
         self._groupby_rows = defaultdict(lambda: AggregateList(agg_list_initializer))
         self._groupby_columns = groupby_columns
 

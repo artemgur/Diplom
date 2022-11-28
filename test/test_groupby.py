@@ -3,7 +3,7 @@ from groupby import Groupby
 
 from utilities.debug import print_separator
 
-groupby = Groupby(groupby_columns='a', agg_list_initializer={'b': Sum}, column_names=['a', 'b_sum'])
+groupby = Groupby(groupby_columns='a', agg_list_initializer=[('b', Sum)], column_names=['a', 'b_sum'])
 print('  a b')
 while True:
     action, a, b = input().split(' ')
