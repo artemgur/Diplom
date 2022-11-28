@@ -18,6 +18,6 @@ class KMHasher:
             yield hash1 + i * hash2
 
     @property
-    def count(self):
+    def hash_functions_count(self):
         return self.__hash_func_count
 

@@ -1,0 +1,16 @@
+{
+  "name": "postgres_debezium_source_connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "plugin.name": "pgoutput",
+    "database.hostname": "postgres_source",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.dbname" : "postgres",
+    "database.server.name": "postgres_source",
+    "table.include.list": "public.my_table",
+    "slot.name": "postgres_debezium_source_slot",
+    "publication.name": "postgres_debezium_source_publication"
+  }
+}

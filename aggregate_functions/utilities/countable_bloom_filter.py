@@ -7,11 +7,15 @@ from .km_hasher import KMHasher
 T = TypeVar('T')
 
 
-class CountableBloomFilter(Generic[T]):
+# TODO change implementation
+# Вычислять количество элементов по формуле из Википедии!
+
+
+class CountableBloomFilter(Generic[T]):  # TODO rename to CountingBloomFilter?
     def __init__(self, length: int, hasher: KMHasher):
         self.__hasher = hasher
         self.__bloom_filter = [0] * length
-        self.__elements_count = 0
+        #self.__elements_count = 0
 
 
     @staticmethod
@@ -26,15 +30,15 @@ class CountableBloomFilter(Generic[T]):
         return set(map(lambda x: x % len(self.__bloom_filter), self.__hasher.hash(element)))
 
 
-    def add(self, element: T) -> bool:
-        contains_result = self.__contains(element)
-        if contains_result[0]:
-            return False
-        element_hash = contains_result[1]
-        self.__elements_count += 1
+    def add(self, element: T):  # -> bool:  # Addition is always successful, no need for a return value
+        #contains_result = self.__contains(element)
+        #if contains_result[0]:
+        #    return False
+        element_hash = self.__hash_element(element) # contains_result[1]
+        #self.__elements_count += 1
         for i in element_hash:
             self.__bloom_filter[i] += 1
-        return True
+        #return True
 
 
     def remove(self, element: T) -> bool:
@@ -42,7 +46,7 @@ class CountableBloomFilter(Generic[T]):
         if contains_result[0]:
             return False
         element_hash = contains_result[1]
-        self.__elements_count -= 1
+        #self.__elements_count -= 1
         for i in element_hash:
             self.__bloom_filter[i] -= 1
         return True
@@ -60,13 +64,30 @@ class CountableBloomFilter(Generic[T]):
         return self.__contains(element)[0]
 
 
-    def get_false_positive_probability(self):
-        return (1 - math.exp(-self.__hasher.count * self.__elements_count / len(self.__bloom_filter))) ** self.__hasher.count
+    # TODO "bits" is not the most precise word here, rename?
+    @property
+    def non_zero_bits_count(self):
+        return len(list(filter(lambda x: x > 0, self.__bloom_filter)))
 
 
     @property
+    def false_positive_probability(self):
+        return (1 - math.exp(-self.__hasher.hash_functions_count * self.elements_count / len(self.__bloom_filter))) ** self.__hasher.hash_functions_count
+
+
+    @property
+    def length(self):
+        return len(self.__bloom_filter)
+
+    @property
+    def hash_functions_count(self):
+        return self.__hasher.hash_functions_count
+
+    # TODO
+    @property
     def elements_count(self):
-        return self.__elements_count
+        return -self.length / self.hash_functions_count * math.log(1 - self.non_zero_bits_count / self.length)
+        #return self.__elements_count
 
 
 def get_optimal_hash_functions_count(length: int, expected_elements_count: int) -> int:

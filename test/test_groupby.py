@@ -9,9 +9,9 @@ while True:
     action, a, b = input().split(' ')
     match action:
         case 'a':
-            groupby.add_row({'a': int(a), 'b': int(b)})
+            groupby.insert({'a': int(a), 'b': int(b)})
         case 'r':
-            groupby.remove_row({'a': int(a), 'b': int(b)})
+            groupby.delete({'a': int(a), 'b': int(b)})
     print_separator()
     for row in groupby.get_result():
         print(row)

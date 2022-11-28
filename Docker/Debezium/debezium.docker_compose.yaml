@@ -1,0 +1,63 @@
+version: '2'
+services:
+  zookeeper:
+    image: quay.io/debezium/zookeeper
+    ports:
+     - "2181:2181"
+     - "2888:2888"
+     - "3888:3888"
+  kafka:
+    image: quay.io/debezium/kafka
+    ports:
+     - "9092:9092"
+    hostname: kafka
+    links:
+     - zookeeper
+    environment:
+     - ADVERTISED_HOST_NAME=kafka
+     - KAFKA_ADVERTISED_PORT=9092
+     - ZOOKEEPER_CONNECT=zookeeper:2181
+  postgres_source:
+    image: postgres
+    ports:
+     - "5432:5432"
+    environment:
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=postgres
+#  postgres_hub:
+#    image: postgres
+#    ports:
+#     - "5432:5432"
+#    environment:
+#     - POSTGRES_USER=postgres
+#     - POSTGRES_PASSWORD=postgres
+  connect:
+    image: quay.io/debezium/connect
+#    build:
+#      context: ..
+#      dockerfile: connect.Dockerfile
+    ports:
+     - "8083:8083"
+    links:
+     - kafka
+     - postgres_source
+#     - postgres_hub
+    environment:
+     - BOOTSTRAP_SERVERS=kafka:9092
+     - GROUP_ID=1
+     - CONFIG_STORAGE_TOPIC=my_connect_configs
+     - OFFSET_STORAGE_TOPIC=my_connect_offsets
+     - STATUS_STORAGE_TOPIC=my_connect_statuses
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+#    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    #restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=localhost:2181
+    links:
+      - kafka
+      - zookeeper

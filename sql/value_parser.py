@@ -1,0 +1,3 @@
+def parse_or_none(value: str, parse_callable):
+    if value.lower() == 'null': # TODO distinguish real nulls and 'null' strings
+        ...

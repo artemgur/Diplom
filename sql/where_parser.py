@@ -1,5 +1,6 @@
 import sqlglot.expressions as se
 
+from utilities.empty_functions import empty_where_function
 
 function_str = '''
 def _parse_where_simple_inner({0}, **kwargs):
@@ -7,8 +8,7 @@ def _parse_where_simple_inner({0}, **kwargs):
 '''
 
 
-def empty_where_function(**kwargs):
-    return True
+
 
 
 # Very simple where condition parser
