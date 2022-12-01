@@ -28,3 +28,25 @@ class TableCacheBase:
         #if not delete_result:
         #    raise ValueError("Attempted to update row which doesn't exist")  # TODO do something better than exception
         self.insert(new_row)
+
+
+    def get_groupby_rows(self):
+        if self._groupby is not None:
+            return self._groupby.get_rows()
+        return None
+
+
+    def get_table_cache_rows(self):
+
+
+    def get_rows(self):
+        groupby_rows = self.get_groupby_rows()
+        if groupby_rows is not None:
+            return groupby_rows
+
+
+
+    def __str__(self):
+        if self._groupby is not None:
+            return str(self._groupby)
+        return None  # TODO

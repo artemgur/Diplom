@@ -48,3 +48,10 @@ class TableCache(TableCacheBase):
         column_id = self._column_names.index(column_name)
         return map(lambda x: x[column_id], self._rows)  # TODO convert to list?
 
+
+    def get_rows(self):
+        groupby_rows
+
+
+
+

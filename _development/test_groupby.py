@@ -1,9 +1,10 @@
 from aggregate_functions import Sum
+from aggregate_initializer import AggregateInitializer
 from groupby import Groupby
 
 from utilities.debug import print_separator
 
-groupby = Groupby(groupby_columns='a', agg_list_initializer=[('b', Sum)], column_names=['a', 'b_sum'])
+groupby = Groupby(groupby_columns=['a'], agg_list_initializer=[AggregateInitializer('b', Sum)])
 print('  a b')
 while True:
     action, a, b = input().split(' ')
@@ -13,6 +14,6 @@ while True:
         case 'r':
             groupby.delete({'a': int(a), 'b': int(b)})
     print_separator()
-    for row in groupby.get_result():
+    for row in groupby.get_rows():
         print(row)
     print_separator()
