@@ -36,7 +36,7 @@ class TableCacheBase:
         return None
 
 
-    def get_table_cache_rows(self):
+    #def get_table_cache_rows(self):
 
 
     def get_rows(self):

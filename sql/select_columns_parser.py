@@ -1,6 +1,6 @@
 import sqlglot.expressions as se
 
-from utilities.utilities import classname_to_snake_case
+from utilities.identifiers import classname_to_snake_case
 
 
 # TODO check if aggregate functions can have multiple arguments in SQL

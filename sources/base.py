@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from table_cache_base import TableCacheBase
+from groupby import Groupby
 
 sources = {}  # TODO change from dict to specialized type?
 
@@ -9,13 +9,13 @@ class Source(ABC):
     def __init__(self, name):
         self._name = name
         sources[name] = self
-        self._subscribed_materialized_views: set[TableCacheBase] = set()
+        self._subscribed_materialized_views: set[Groupby] = set()
 
 
-    def subscribe(self, materialized_view: TableCacheBase):
+    def subscribe(self, materialized_view: Groupby):
         self._subscribed_materialized_views.add(materialized_view)
 
-    def unsubscribe(self, materialized_view: TableCacheBase):
+    def unsubscribe(self, materialized_view: Groupby):
         self._subscribed_materialized_views.remove(materialized_view)
 
 

@@ -4,8 +4,8 @@
 
 from aggregate_functions import Avg, Max, Aggregate
 
-print(Avg.has_delete())
-print(Max.has_delete())
-print(Aggregate.has_delete())
+print(Avg.needs_column_cache())
+print(Max.needs_column_cache())
+print(Aggregate.needs_column_cache())
 #print(Avg.remove_value == Aggregate.remove_value)
 #print(Max.remove_value == Aggregate.remove_value)

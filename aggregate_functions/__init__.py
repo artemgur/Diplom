@@ -7,6 +7,7 @@ from .base import Aggregate
 from .sum import Sum
 from .avg import Avg
 from .max import Max
+from .min import Min
 
 
 # TODO move the function somewhere?

@@ -3,20 +3,28 @@ from collections import defaultdict
 from tabulate import tabulate
 
 from aggregate_initializer import AggregateInitializer
-from aggregate_list import AggregateList
+from group import Group
 import constants.output
+from utilities.empty_functions import empty_where_function
 
 
+# TODO optional ordered storage?
+# It should be easy to make ordered storage based on groupby column, but harder – based on aggregate
 class Groupby:
     # groupby_columns – list[str] (or maybe tuple[str]) of column names
     # _groupby_rows – dict. Key – tuple of values of groupby columns, values – list of aggregate functions
-    def __init__(self, groupby_columns: list[str], agg_list_initializer: list[AggregateInitializer]):
+    def __init__(self, groupby_columns: list[str], agg_list_initializer: list[AggregateInitializer], where=empty_where_function, having=empty_where_function):
         self._agg_list_initializer = agg_list_initializer
-        self._groupby_rows = defaultdict(lambda: AggregateList(agg_list_initializer))
+        self._groupby_rows = defaultdict(lambda: Group(agg_list_initializer))
         self._groupby_columns = groupby_columns
+        self._where = where
+        self._having = having  # TODO
 
     # row is dict for now
     def insert(self, row):
+        if not self._where(**row):
+            return False
+
         groupby_values = tuple(row[key] for key in self._groupby_columns)
         self._groupby_rows[groupby_values].insert(row)
         #return True  # TODO
@@ -25,6 +33,11 @@ class Groupby:
         groupby_values = tuple(row[key] for key in self._groupby_columns)
         self._groupby_rows[groupby_values].delete(row)
         #return True  # TODO
+
+
+    def update(self, old_row, new_row):
+        self.delete(old_row)
+        self.insert(new_row)
 
 
     @property

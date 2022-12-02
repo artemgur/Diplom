@@ -17,8 +17,16 @@ class AggregateInitializer:
         return self._aggregate_type.function_name() + '(' + self._column_name + ')'
 
 
-    def init_aggregate(self):
-        return AggregateTuple(column_name=self._column_name, aggregate=self._aggregate_type(**self._init_parameters))
+    def init_aggregate(self, column_cache):
+        return AggregateTuple(column_name=self._column_name, aggregate=self._aggregate_type(**self._init_parameters, column_cache=column_cache))
+
+
+    @property
+    def column_to_cache(self):
+        # TODO combine cache
+        if self._aggregate_type.needs_column_cache():
+            return self._column_name
+        return None
 
 
 @dataclass(frozen=True)

@@ -15,6 +15,10 @@ class DebeziumSource(Source):
     def listen(self):
         consumer = KafkaConsumer(self._kafka_topic_name, **self._kafka_configuration)
         for message in consumer:
+            # Empty messages appear on DELETE. These are tombstone messages, needed for Kafka and irrelevant in our case
+            if message.value is None:
+                continue
+
             message_dict = json.loads(message.value)
             old_row = message_dict['payload']['before']
             new_row = message_dict['payload']['after']

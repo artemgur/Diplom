@@ -3,6 +3,7 @@ from collections import deque
 from table_cache_base import TableCacheBase
 from utilities.empty_functions import empty_where_function
 
+# Logic partially moved to TableData
 
 # Useful for groupbys which don't need cache if we want consistency for delete
 # Update: it is not consistent for delete because of WHERE condition. Because we just don't store rows which don't match WHERE
@@ -49,8 +50,8 @@ class TableCache(TableCacheBase):
         return map(lambda x: x[column_id], self._rows)  # TODO convert to list?
 
 
-    def get_rows(self):
-        groupby_rows
+    #def get_rows(self):
+    #    groupby_rows
 
 
 
