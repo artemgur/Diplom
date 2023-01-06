@@ -32,6 +32,8 @@ class Group:
         if delete_actually_removed_row:
             for i, aggregate_tuple in enumerate(self._aggregate_list):
                 self._aggregate_list[i].aggregate.delete(row[aggregate_tuple.column_name])
+            return True
+        return False
 
     #def update(self, old_row, new_row):
     #    self.delete(old_row)
