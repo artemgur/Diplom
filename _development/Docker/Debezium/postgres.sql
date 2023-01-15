@@ -22,4 +22,4 @@ DELETE FROM my_table WHERE b < 5 AND a < 30;
 
 UPDATE my_table SET b = 100 WHERE a > 90;
 
-TRUNCATE TABLE my_table;
+--TRUNCATE TABLE my_table;

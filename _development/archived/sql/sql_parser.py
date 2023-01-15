@@ -1,14 +1,12 @@
 import sqlglot
 import sqlglot.expressions as se
 
-from sources import base
-import where_parser
+from api import where_parser
 
 import select_columns_parser
 from orderby import OrderBy
 import orderby_parser
 from sql import groupby_parser
-from table_cache_factory import table_cache_factory
 
 
 
@@ -28,8 +26,8 @@ def parse(sql_str: str):
     result_groupby = groupby_parser.parse_groupby(sql_tree_root.find(se.Group))
 
     #check_select_groupby_validity(result_select, result_groupby)
-    table_cache_factory(select_columns_result=result_select,
-                        source_name=result_source,
-                        where_callable=result_where_callable,
-                        orderby_result=result_orderby,
-                        groupby_result=result_groupby)
+    #table_cache_factory(select_columns_result=result_select,
+    #                    source_name=result_source,
+    #                    where_callable=result_where_callable,
+    #                    orderby_result=result_orderby,
+    #                    groupby_result=result_groupby)

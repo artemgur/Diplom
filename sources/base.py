@@ -6,7 +6,7 @@ sources = {}  # TODO change from dict to specialized type?
 
 
 class Source(ABC):
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         self._name = name
         sources[name] = self
         self._subscribed_materialized_views: set[Groupby] = set()
@@ -32,6 +32,14 @@ class Source(ABC):
         else:
             for materialized_view in self._subscribed_materialized_views:
                 materialized_view.update(old_row, new_row)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def views(self):
+        return self._subscribed_materialized_views
 
     @abstractmethod
     def listen(self):

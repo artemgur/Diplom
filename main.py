@@ -1,11 +1,16 @@
-# import aggregate_functions
+# # import aggregate_functions
+# #
+# # print(aggregate_functions.get_aggregate_function_names())
 #
-# print(aggregate_functions.get_aggregate_function_names())
+# from aggregate_functions import Avg, Max, Aggregate
+#
+# print(Avg.needs_column_cache())
+# print(Max.needs_column_cache())
+# print(Aggregate.needs_column_cache())
+# #print(Avg.remove_value == Aggregate.remove_value)
+# #print(Max.remove_value == Aggregate.remove_value)
 
-from aggregate_functions import Avg, Max, Aggregate
+if __name__ == '__main__':
+    import processes.main_process
 
-print(Avg.needs_column_cache())
-print(Max.needs_column_cache())
-print(Aggregate.needs_column_cache())
-#print(Avg.remove_value == Aggregate.remove_value)
-#print(Max.remove_value == Aggregate.remove_value)
+    processes.main_process.run()

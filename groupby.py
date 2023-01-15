@@ -1,10 +1,12 @@
+import time
 from collections import defaultdict
 
 from tabulate import tabulate
 
+import constants
 from aggregate_initializer import AggregateInitializer
 from group import Group
-import constants.output
+from group_extrapolation import GroupExtrapolation
 from utilities.empty_functions import empty_where_function
 
 
@@ -13,12 +15,22 @@ from utilities.empty_functions import empty_where_function
 class Groupby:
     # groupby_columns – list[str] (or maybe tuple[str]) of column names
     # _groupby_rows – dict. Key – tuple of values of groupby columns, values – list of aggregate functions
-    def __init__(self, groupby_columns: list[str], agg_list_initializer: list[AggregateInitializer], where=empty_where_function, having=empty_where_function):
-        self._agg_list_initializer = agg_list_initializer
-        self._groupby_rows = defaultdict(lambda: Group(agg_list_initializer))
+    def __init__(self, name: str, groupby_columns: list[str], aggregate_initializers: list[AggregateInitializer], where=empty_where_function,
+                 #having=empty_where_function,
+                 extrapolation=False, extrapolation_method='linear', extrapolation_cache_size=100):
+        self._name = name
+
+
+        self._aggregate_initializers = aggregate_initializers
+        # TODO extrapolation arguments
+        self._extrapolation = extrapolation
+        self._extrapolation_method = extrapolation_method
+        self._extrapolation_cache_size = extrapolation_cache_size
+        self._groupby_rows = defaultdict(lambda: Group(aggregate_initializers)) if not self._extrapolation else \
+            defaultdict(lambda: GroupExtrapolation(aggregate_initializers, extrapolation_method=self._extrapolation_method, cache_size=self._extrapolation_cache_size))
         self._groupby_columns = groupby_columns
         self._where = where
-        self._having = having  # TODO
+        #self._having = having  # TODO
 
     # row is dict for now
     def insert(self, row):
@@ -42,7 +54,7 @@ class Groupby:
 
     @property
     def column_names(self):
-        return self._groupby_columns + list(map(lambda x: str(x), self._agg_list_initializer))
+        return self._groupby_columns + list(map(lambda x: str(x), self._aggregate_initializers))
 
 
     def get_rows(self):
@@ -50,5 +62,32 @@ class Groupby:
             yield list(key) + value.get_result()
 
 
+    def extrapolate(self, extrapolation_timestamp=None):
+        if extrapolation_timestamp is None:
+            extrapolation_timestamp = time.time()
+        if not self._extrapolation:
+            raise ValueError('Attempted to extrapolate a groupby in which extrapolation is not enabled')
+        for key, value in self._groupby_rows.items():
+            yield list(key) + value.extrapolate(extrapolation_timestamp)
+
+    def to_string_extrapolated(self, extrapolation_timestamp=None):
+        return tabulate(self.extrapolate(extrapolation_timestamp), headers=self.column_names, tablefmt=constants.TABULATE_FORMAT)
+
+
+    @property
+    def name(self):
+        return self._name
+
+
     def __str__(self):
-        return tabulate(self.get_rows(), headers=self.column_names, tablefmt=constants.output.TABULATE_FORMAT)
+        return tabulate(self.get_rows(), headers=self.column_names, tablefmt=constants.TABULATE_FORMAT)
+
+
+    # To store groupbys in sets
+    def __eq__(self, other):
+        return self._name == other.name
+
+
+    # To store groupbys in sets
+    def __hash__(self):
+        return hash(self._name)

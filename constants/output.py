@@ -1,1 +1,0 @@
-TABULATE_FORMAT = 'rounded_outline'
