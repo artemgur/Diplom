@@ -4,6 +4,7 @@ from utilities import identifiers
 
 
 class Aggregate:
+    """Aggregate function base class"""
     # TODO mirror constructor arguments changes to subclasses
     def __init__(self, state=None, column_cache: Callable[[], Iterable]=None):
         self._initial_state = state  # TODO init this variable only if it will be actually used later?
@@ -11,12 +12,28 @@ class Aggregate:
         self._column_cache = column_cache  # TODO implement row cache, update usages after that
 
     def insert(self, value):
+        """
+        Add value to aggregate
+
+        In base class, raises NotImplementedError
+        """
         raise NotImplementedError
 
     def get_result(self):
+        """
+        Get aggregate value
+
+        In base class, returns aggregate state as is. This can be changed in subclasses
+        """
         return self._state
 
+
     def delete(self, value):
+        """
+        Remove value from aggregate
+
+        In base class, recalculates aggregate from cache. This can be changed in subclasses
+        """
         self._column_cache_full_recalculation()
         #raise NotImplementedError
 
@@ -24,12 +41,15 @@ class Aggregate:
         raise NotImplementedError
 
     def add_values(self, values: Iterable):
+        """
+        Add multiple value to aggregate
+        """
         for value in values:
             self.insert(value)
 
     @property
     def state(self):
-        return self.state
+        return self._state
 
     def _reset_state(self):
         self._state = self._initial_state

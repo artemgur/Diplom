@@ -38,6 +38,9 @@ def groupby_columns(json_dict: dict) -> list:
     return json_dict['groupby_columns']
 
 
+def column_aliases(json_dict: dict) -> list:
+    return json_dict['column_aliases'] if 'column_aliases' in json_dict else []
+
 def columns(json_dict: dict):
     ...
 
@@ -57,11 +60,21 @@ def aggregate_initializers(json_dict: dict) -> list[AggregateInitializer]:
     return result
 
 
-def send_response(response, request_dict: dict, response_dict: dict):
+def send_response(response, request_dict: dict, response_dict: dict, success=True):
+    success_str = '1' if success else 0
     request_uuid = request_dict['request_uuid']
-    response_dict[request_uuid] = response
+    response_dict[request_uuid] = success_str + response
 
 
 def where(json_dict: dict):
     # TODO
     return empty_where_function #parse_where_simple(json_dict['where'], )
+
+
+def error_decorator(func):
+    def wrapper(request_dict: dict, responses_dict: dict, *args, **kwargs):
+        try:
+            func(request_dict, responses_dict, *args, **kwargs)
+        except Exception as e:
+            send_response(str(e), request_dict, responses_dict, success=False)
+    return wrapper

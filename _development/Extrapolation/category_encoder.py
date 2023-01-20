@@ -7,7 +7,7 @@ import pandas_utilities as pdu
 class CategoryEncoder:
     def __init__(self, p_value_threshold=0.1):
         self._p_value_threshold = p_value_threshold
-        self._best_correlations = {}  # TODO словарь пока не используется, но может пригодиться
+        self._best_correlations = {}  # Словарь пока не используется, но может пригодиться
         self._best_correlations_means = {}
         self._not_correlated_columns = []
 

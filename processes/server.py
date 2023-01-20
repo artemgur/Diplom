@@ -12,6 +12,8 @@ class ThreadingServer(ThreadingMixIn, HTTPServer):
     pass
 
 # TODO support multiple simultaneous commands to one target (dicts should contain lists of requests, not individual requests)
+# Make it async using aiohttp?
+# ThreadingMixIn?
 class Handler(BaseHTTPRequestHandler):
     def __init__(self, queries_dict: dict, responses_dict, *args, **kwargs):
         self._queries_dict = queries_dict
@@ -33,13 +35,16 @@ class Handler(BaseHTTPRequestHandler):
         while request_uuid not in self._responses_dict:
             time.sleep(0.1)
         response: str = self._responses_dict[request_uuid]
-        # 200 should be not in every case
-        self.send_response(200)
+        response_success = response[0]
+        if response_success == '1':
+            self.send_response(200)
+        else:
+            self.send_response(400)
         # TODO
         #self.send_header("Content-type", "text/html")
         self.end_headers()
         # TODO
-        self.wfile.write(response.encode())
+        self.wfile.write(response[1:].encode())
         #self.wfile.close()
 
 

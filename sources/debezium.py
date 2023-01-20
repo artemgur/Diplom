@@ -12,6 +12,7 @@ class DebeziumSource(Source):
         self._kafka_configuration = kwargs
 
 
+    # Make it async using aiokafka?
     def listen(self):
         consumer = KafkaConsumer(self._kafka_topic_name, **self._kafka_configuration)
         for message in consumer:

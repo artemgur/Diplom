@@ -2,13 +2,13 @@ from abc import ABC, abstractmethod
 
 from groupby import Groupby
 
-sources = {}  # TODO change from dict to specialized type?
+#sources = {}  # TODO change from dict to specialized type?
 
-
+# Add Clickhouse Kafka source?
 class Source(ABC):
     def __init__(self, name, **kwargs):
         self._name = name
-        sources[name] = self
+        #sources[name] = self
         self._subscribed_materialized_views: set[Groupby] = set()
 
 

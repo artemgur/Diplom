@@ -16,6 +16,7 @@ class Groupby:
     # groupby_columns – list[str] (or maybe tuple[str]) of column names
     # _groupby_rows – dict. Key – tuple of values of groupby columns, values – list of aggregate functions
     def __init__(self, name: str, groupby_columns: list[str], aggregate_initializers: list[AggregateInitializer], where=empty_where_function,
+                 column_aliases: list[str] = [],
                  #having=empty_where_function,
                  extrapolation=False, extrapolation_method='linear', extrapolation_cache_size=100):
         self._name = name
@@ -30,6 +31,7 @@ class Groupby:
             defaultdict(lambda: GroupExtrapolation(aggregate_initializers, extrapolation_method=self._extrapolation_method, cache_size=self._extrapolation_cache_size))
         self._groupby_columns = groupby_columns
         self._where = where
+        self._column_aliases = self._determine_column_names(column_aliases)
         #self._having = having  # TODO
 
     # row is dict for now
@@ -53,7 +55,7 @@ class Groupby:
 
 
     @property
-    def column_names(self):
+    def _base_column_names(self):
         return self._groupby_columns + list(map(lambda x: str(x), self._aggregate_initializers))
 
 
@@ -77,6 +79,28 @@ class Groupby:
     @property
     def name(self):
         return self._name
+
+    @property
+    def columns_count(self):
+        return len(self._aggregate_initializers)
+
+    @property
+    def column_names(self):
+        return self._column_aliases
+
+
+    def _determine_column_aliases(self, column_aliases: list[str]):
+        # Padding column_aliases list to columns count
+        column_names = column_aliases + [''] * (self.columns_count - len(column_aliases))
+        for i in range(len(column_names)):
+            if column_names[i] == '':
+                column_names[i] = self._base_column_names[i]
+        return column_names
+
+
+    def select(self, column_names=None, where=empty_where_function):
+        if column_names is None:
+            column_names = self.column_names
 
 
     def __str__(self):
