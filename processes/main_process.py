@@ -71,7 +71,7 @@ def drop_source(request_dict, responses_dict):
 
 
 
-def start_source_process(source: Source, request_dict: dict, responses_dict: dict):
-    source_proc = Process(target=source_process.run, args=(source, request_dict, responses_dict))
+def start_source_process(source: Source, request_dict: dict, responses_dict: dict, view_names: dict):
+    source_proc = Process(target=source_process.run, args=(source, request_dict, responses_dict, view_names))
     sources_to_process[source.name] = source_proc
     source_proc.start()

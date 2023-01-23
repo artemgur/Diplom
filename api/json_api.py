@@ -1,15 +1,17 @@
+import traceback
+
 import utilities.reflection
 from aggregate_initializer import AggregateInitializer
 from aggregate_functions import *
-from api.where_parser import parse_where_simple
 import constants
+from api import select_where_parser, view_where_parser
 from utilities.empty_functions import empty_where_function
 
 
 def get_target(json_dict: dict) -> str:
     if query_type(json_dict) in ['CREATE SOURCE', 'DROP SOURCE']:
         return constants.MAIN_PROCESS_NAME
-    if query_type(json_dict) in ['CREATE VIEW, DROP VIEW']:
+    if query_type(json_dict) in ['CREATE VIEW', 'DROP VIEW']:
         return 'source.' + view_source_name(json_dict)
     else:
         return 'view.' + name(json_dict)
@@ -42,7 +44,7 @@ def column_aliases(json_dict: dict) -> list:
     return json_dict['column_aliases'] if 'column_aliases' in json_dict else []
 
 def columns(json_dict: dict):
-    ...
+    return json_dict['columns'] if 'columns' in json_dict else None
 
 
 
@@ -61,14 +63,25 @@ def aggregate_initializers(json_dict: dict) -> list[AggregateInitializer]:
 
 
 def send_response(response, request_dict: dict, response_dict: dict, success=True):
-    success_str = '1' if success else 0
+    success_str = '1' if success else '0'
     request_uuid = request_dict['request_uuid']
     response_dict[request_uuid] = success_str + response
 
 
-def where(json_dict: dict):
-    # TODO
-    return empty_where_function #parse_where_simple(json_dict['where'], )
+def select_where(json_dict: dict, columns: list[str]):
+    if 'where' not in json_dict:
+        return empty_where_function
+    return select_where_parser.parse(json_dict['where'], columns)
+
+
+def view_where(json_dict: dict):
+    if 'where' not in json_dict:
+        return empty_where_function
+    return view_where_parser.parse(json_dict['where'])
+
+
+def extrapolation_timestamp(json_dict: dict):
+    return json_dict['extrapolation_timestamp'] if 'extrapolation_timestamp' in json_dict else None
 
 
 def error_decorator(func):
@@ -77,4 +90,7 @@ def error_decorator(func):
             func(request_dict, responses_dict, *args, **kwargs)
         except Exception as e:
             send_response(str(e), request_dict, responses_dict, success=False)
+            traceback.print_exc()
     return wrapper
+
+

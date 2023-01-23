@@ -29,6 +29,7 @@ class Handler(BaseHTTPRequestHandler):
         json_dict['request_uuid'] = request_uuid
         json_str = json.dumps(json_dict, ensure_ascii=False)
         target = json_api.get_target(json_dict)
+        print(target)
         self._queries_dict[target] = json_str
         # TODO make this async
         #print(self._queries_dict)

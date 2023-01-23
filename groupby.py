@@ -8,6 +8,7 @@ from aggregate_initializer import AggregateInitializer
 from group import Group
 from group_extrapolation import GroupExtrapolation
 from utilities.empty_functions import empty_where_function
+import utilities.list
 
 
 # TODO optional ordered storage?
@@ -31,7 +32,7 @@ class Groupby:
             defaultdict(lambda: GroupExtrapolation(aggregate_initializers, extrapolation_method=self._extrapolation_method, cache_size=self._extrapolation_cache_size))
         self._groupby_columns = groupby_columns
         self._where = where
-        self._column_aliases = self._determine_column_names(column_aliases)
+        self._column_aliases = self._determine_column_aliases(column_aliases)
         #self._having = having  # TODO
 
     # row is dict for now
@@ -82,7 +83,7 @@ class Groupby:
 
     @property
     def columns_count(self):
-        return len(self._aggregate_initializers)
+        return len(self._groupby_columns) + len(self._aggregate_initializers)
 
     @property
     def column_names(self):
@@ -98,9 +99,23 @@ class Groupby:
         return column_names
 
 
-    def select(self, column_names=None, where=empty_where_function):
+    def _select(self, input_rows, column_names=None, where=empty_where_function):
+        #if column_names is None:
+        #    column_names = self.column_names
+        where_rows = filter(lambda x: where(*x), input_rows)
         if column_names is None:
-            column_names = self.column_names
+            return where_rows
+        column_indexes = utilities.list.find_multiple(self.column_names, column_names)
+        rows = map(lambda x: utilities.list.index_many(x, column_indexes), where_rows)
+        return rows
+
+
+    def select(self, column_names=None, where=empty_where_function):
+        return self._select(self.get_rows(), column_names, where)
+
+    def select_extrapolated(self, column_names=None, where=empty_where_function, extrapolation_timestamp=None):
+        rows = self.extrapolate(extrapolation_timestamp=extrapolation_timestamp)
+        return self._select(rows, column_names, where)
 
 
     def __str__(self):
