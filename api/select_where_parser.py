@@ -40,7 +40,7 @@ def replace_strings_with_spaces(where: str, strings):
 def list_to_pairs(l):
     return list(zip(l[::2], l[1::2]))
 
-# TODO improve
+# Improve
 def replace_identifiers(where: str, where_without_strings: str, columns: list[str], regex_bounds):
     for i, column in enumerate(columns):
         new_str = f'args[{i}]'
@@ -66,10 +66,8 @@ def replace_arguments(where: str, columns: list[str]):
     single_quotes = find_all_char(where, "'")
     non_escaped_single_quotes = list(filter(lambda x: x not in escaped_single_quotes, single_quotes)) # Can be optimized, fine for now
     strings = list_to_pairs(non_escaped_single_quotes)
-    #print(strings)
 
     where_without_strings = replace_strings_with_spaces(where, strings)
-    #print(where_without_strings)
     where, where_without_strings = replace_identifiers(where, where_without_strings, columns, regex_bounds='"')
     where, where_without_strings = replace_identifiers(where, where_without_strings, columns, regex_bounds=r'\b')
     return where
@@ -78,19 +76,15 @@ def replace_arguments(where: str, columns: list[str]):
     #quoted_identifier_quotes = double_quotes_not_in_strings(double_quotes, strings)
     #quoted_identifiers = list_to_pairs(quoted_identifier_quotes)
 
-    #for i in escaped_single_quotes:
-    #    print(where[i])
+
 
 
 def parse(where: str, columns: list[str]):
     where = replace_arguments(where, columns)
     result_function_str = function_str.format(where)
-    print(result_function_str)
     exec(result_function_str)
     return locals().get('_parse_where_simple_inner')
 
 
 #s = r"fghdf''jgch'hsdfegwr\'flfy\\'lmko'u'lm_l_"
 # s = "a > 15 or b == 'sgas' and \"sum(b)\" < a"
-# print(s)
-# print(parse(s, ['a', 'b', 'sum(b)']))

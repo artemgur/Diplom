@@ -5,6 +5,7 @@ from aggregate_initializer import AggregateInitializer
 from aggregate_functions import *
 import constants
 from api import select_where_parser, view_where_parser
+from orderby import OrderBy
 from utilities.empty_functions import empty_where_function
 
 
@@ -56,7 +57,7 @@ def aggregate_initializers(json_dict: dict) -> list[AggregateInitializer]:
         parameters = agg_initializer_dict['parameters'] if 'parameters' in agg_initializer_dict else {}
         function_type = utilities.reflection.str_to_type(function_name)
         if not issubclass(function_type, Aggregate):
-            raise ValueError  # TODO do something better than exception
+            raise ValueError(f'String "{function_type}" is not an Aggregate')
         agg_initializer = AggregateInitializer(column_name, function_type, parameters)
         result.append(agg_initializer)
     return result
@@ -82,6 +83,20 @@ def view_where(json_dict: dict):
 
 def extrapolation_timestamp(json_dict: dict):
     return json_dict['extrapolation_timestamp'] if 'extrapolation_timestamp' in json_dict else None
+
+
+def orderby(json_dict: dict):
+    if 'orderby' not in json_dict:
+        return []
+    result = []
+    for orderby_ in json_dict['orderby']:
+        if isinstance(orderby_, list):
+            column_name = orderby_[0]
+            desc = orderby_[1].upper() == 'DESC'
+            result.append(OrderBy(column_name=column_name, desc=desc))
+        else:
+            result.append(OrderBy(column_name=orderby_, desc=False))
+    return result
 
 
 def error_decorator(func):

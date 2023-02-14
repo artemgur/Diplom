@@ -27,7 +27,7 @@ class TableData:
                 row_to_delete_id = row_number
         if row_to_delete_id == -1:  # Row not found in cache
             return False
-        del self._rows[row_to_delete_id]  # TODO check if it works
+        del self._rows[row_to_delete_id]
         return True
 
     #def update(self, old_row: dict, new_row: dict):

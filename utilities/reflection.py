@@ -1,20 +1,17 @@
 import keyword
 
+# noinspection PyUnresolvedReferences
 from sources import *
+# noinspection PyUnresolvedReferences
 from aggregate_functions import *
 
 
 def str_to_type(x: str):
     if not is_valid_identifier(x):
         raise ValueError(f'String "{x}" is not a valid identifier')
-    #try:
-    #exec(f'result = {x}')
-    #result = locals().get('result')
     result = eval(x)
-    print(result)
-    assert isinstance(result, type)
-    #except:
-    #    raise ValueError(f'String "{x}" is not a valid type')
+    if not isinstance(result, type):
+        raise ValueError(f'String "{x}" is not a valid type')
     return result
 
 

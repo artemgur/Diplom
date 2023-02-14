@@ -2,7 +2,6 @@ from aggregate_initializer import AggregateInitializer, AggregateTuple
 from table_data import TableData
 
 
-# TODO rename. Maybe should be called GroupbyClause?
 class Group:
     def __init__(self, agg_list_initializer: list[AggregateInitializer]):
         # Order shouldn't matter here

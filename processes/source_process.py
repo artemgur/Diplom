@@ -12,11 +12,7 @@ def run(source: Source, queries_dict: dict, responses_dict: dict, view_names: di
     while True:
         source.listen()
         source_name = 'source.' + source.name
-        #print(source_name)
-        #print(queries_dict)
-        #print(1)
         if source_name in queries_dict:
-            #print(1)
             request_dict = json.loads(queries_dict[source_name])
             run_source_queries(source, request_dict, responses_dict, view_names)
             del queries_dict[source_name]
@@ -47,7 +43,6 @@ def run_queries(source: Source, view: Groupby, request_dict: dict, responses_dic
 
 @json_api.error_decorator
 def create_view(request_dict: dict, responses_dict: dict, source: Source, view_names: dict):
-    print(1)
     name = json_api.name(request_dict)
     if name in view_names:
         raise ValueError(f'View with name {name} already exists')
@@ -74,16 +69,17 @@ def drop_view(request_dict: dict, responses_dict: dict, source: Source, view: Gr
 
 @json_api.error_decorator
 def select(request_dict: dict, responses_dict: dict, view: Groupby):
-    print(view.column_names)
     columns = json_api.columns(request_dict)
     where = json_api.select_where(request_dict, view.column_names)
+    orderby_list = json_api.orderby(request_dict)
     # TODO where having, order by
     # TODO better result format
     #result = str(view)
     rows = view.select(column_names=columns, where=where)
+    if len(orderby_list) > 0:
+        rows = view.orderby(column_names=columns, rows=rows, orderby_list=orderby_list)
     if columns is None:
         columns = view.column_names
-    #print(view._base_column_names)
     result = rows_formatter.csv(rows, column_names=columns)
     json_api.send_response(result, request_dict, responses_dict)
 

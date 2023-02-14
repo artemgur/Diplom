@@ -1,5 +1,6 @@
 import time
 from collections import defaultdict
+from typing import Iterable
 
 from tabulate import tabulate
 
@@ -7,6 +8,7 @@ import constants
 from aggregate_initializer import AggregateInitializer
 from group import Group
 from group_extrapolation import GroupExtrapolation
+from orderby import OrderBy
 from utilities.empty_functions import empty_where_function
 import utilities.list
 
@@ -17,14 +19,15 @@ class Groupby:
     # groupby_columns – list[str] (or maybe tuple[str]) of column names
     # _groupby_rows – dict. Key – tuple of values of groupby columns, values – list of aggregate functions
     def __init__(self, name: str, groupby_columns: list[str], aggregate_initializers: list[AggregateInitializer], where=empty_where_function,
-                 column_aliases: list[str] = [],
-                 #having=empty_where_function,
+                 column_aliases=None,
                  extrapolation=False, extrapolation_method='linear', extrapolation_cache_size=100):
+
+        if column_aliases is None:
+            column_aliases = []
         self._name = name
 
 
         self._aggregate_initializers = aggregate_initializers
-        # TODO extrapolation arguments
         self._extrapolation = extrapolation
         self._extrapolation_method = extrapolation_method
         self._extrapolation_cache_size = extrapolation_cache_size
@@ -33,7 +36,6 @@ class Groupby:
         self._groupby_columns = groupby_columns
         self._where = where
         self._column_aliases = self._determine_column_aliases(column_aliases)
-        #self._having = having  # TODO
 
     # row is dict for now
     def insert(self, row):
@@ -42,12 +44,12 @@ class Groupby:
 
         groupby_values = tuple(row[key] for key in self._groupby_columns)
         self._groupby_rows[groupby_values].insert(row)
-        #return True  # TODO
+        return True
 
     def delete(self, row):
         groupby_values = tuple(row[key] for key in self._groupby_columns)
         self._groupby_rows[groupby_values].delete(row)
-        #return True  # TODO
+        return True
 
 
     def update(self, old_row, new_row):
@@ -108,6 +110,18 @@ class Groupby:
         column_indexes = utilities.list.find_multiple(self.column_names, column_names)
         rows = map(lambda x: utilities.list.index_many(x, column_indexes), where_rows)
         return rows
+
+
+    def orderby(self, column_names: list[str], rows: Iterable, orderby_list: list[OrderBy]):
+        if column_names is None:
+            column_names = self.column_names
+
+        rows_list = list(rows)
+        for orderby in reversed(orderby_list):
+            index_to_sort = column_names.index(orderby.column_name)
+            rows_list.sort(key=lambda x: x[index_to_sort], reverse=orderby.desc)
+        return rows_list
+
 
 
     def select(self, column_names=None, where=empty_where_function):

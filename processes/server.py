@@ -22,6 +22,8 @@ class Handler(BaseHTTPRequestHandler):
     
     def do_POST(self):
         request_uuid = str(uuid.uuid4())
+        # For test_multiple_clients.py
+        #print('Started handling query', request_uuid)
         content_length = int(self.headers['Content-Length'])
         content = self.rfile.read(content_length).decode('utf-8')
 
@@ -29,10 +31,9 @@ class Handler(BaseHTTPRequestHandler):
         json_dict['request_uuid'] = request_uuid
         json_str = json.dumps(json_dict, ensure_ascii=False)
         target = json_api.get_target(json_dict)
-        print(target)
+        # For test_multiple_clients.py
+        #print('    Target', target, 'request uuid', request_uuid)
         self._queries_dict[target] = json_str
-        # TODO make this async
-        #print(self._queries_dict)
         while request_uuid not in self._responses_dict:
             time.sleep(0.1)
         response: str = self._responses_dict[request_uuid]
@@ -46,7 +47,8 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         # TODO
         self.wfile.write(response[1:].encode())
-        #self.wfile.close()
+        # For test_multiple_clients.py
+        #print('Finished handling query', request_uuid)
 
 
 
@@ -57,5 +59,5 @@ def start_handler(queries_dict: dict, responses_dict: dict):
     #server = HTTPServer(('127.0.0.1', 8000), Handler)
     # Source: https://stackoverflow.com/a/52046062
     handler = partial(Handler, queries_dict, responses_dict)
-    with HTTPServer(('127.0.0.1', constants.SERVER_PORT), handler) as server:
+    with ThreadingServer(('127.0.0.1', constants.SERVER_PORT), handler) as server:
         server.serve_forever()
