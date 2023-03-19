@@ -1,6 +1,6 @@
 from . import Aggregate
-from .utilities.countable_bloom_filter import CountableBloomFilter
-from .utilities import hash_functions
+from .aggregate_utilities.countable_bloom_filter import CountableBloomFilter
+from .aggregate_utilities import hash_functions
 
 
 class CountDistinctCBF(Aggregate):

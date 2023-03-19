@@ -9,6 +9,7 @@ import rows_formatter
 
 
 def run(source: Source, queries_dict: dict, responses_dict: dict, view_names: dict):
+    drop_source = False
     while True:
         source.listen()
         source_name = 'source.' + source.name
@@ -20,14 +21,23 @@ def run(source: Source, queries_dict: dict, responses_dict: dict, view_names: di
             view_name = 'view.' + view.name
             if view_name in queries_dict:
                 request_dict = json.loads(queries_dict[view_name])
-                run_queries(source, view, request_dict, responses_dict, view_names)
+                if json_api.query_type(request_dict) == 'DROP SOURCE':
+                    drop_source = True
+                    finalize_process(source, view_names)
+                    json_api.send_response('OK', request_dict, responses_dict)
+                else:
+                    run_queries(source, view, request_dict, responses_dict, view_names)
                 del queries_dict[view_name]
+
+        if drop_source:
+            break
+
         time.sleep(SLEEP_TIME_BETWEEN_QUERIES)
 
 
 def run_source_queries(source: Source, request_dict: dict, responses_dict: dict, view_names: dict):
     match json_api.query_type(request_dict):
-        case 'CREATE VIEW':
+        case 'CREATE MATERIALIZED VIEW':
             create_view(request_dict, responses_dict, source, view_names)
 
 
@@ -37,7 +47,7 @@ def run_queries(source: Source, view: Groupby, request_dict: dict, responses_dic
             select(request_dict, responses_dict, view)
         case 'SELECT EXTRAPOLATED':
             select_extrapolated(request_dict, responses_dict, view)
-        case 'DROP VIEW':
+        case 'DROP MATERIALIZED VIEW':
             drop_view(request_dict, responses_dict, source, view, view_names)
 
 
@@ -80,7 +90,7 @@ def select(request_dict: dict, responses_dict: dict, view: Groupby):
         rows = view.orderby(column_names=columns, rows=rows, orderby_list=orderby_list)
     if columns is None:
         columns = view.column_names
-    result = rows_formatter.csv(rows, column_names=columns)
+    result = rows_formatter.format(rows, column_names=columns, format_type=json_api.format(request_dict))
     json_api.send_response(result, request_dict, responses_dict)
 
 @json_api.error_decorator
@@ -94,5 +104,10 @@ def select_extrapolated(request_dict: dict, responses_dict: dict, view: Groupby)
     rows = view.select_extrapolated(column_names=columns, where=where, extrapolation_timestamp=extrapolation_timestamp)
     if columns is None:
         columns = view.column_names
-    result = rows_formatter.csv(rows, column_names=columns)
+    result = rows_formatter.format(rows, column_names=columns, format_type=json_api.format(request_dict))
     json_api.send_response(result, request_dict, responses_dict)
+
+
+def finalize_process(source: Source, view_names: dict):
+    for view in source.views:
+        del view_names[view.name]

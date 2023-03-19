@@ -9,7 +9,7 @@
     "database.password": "postgres",
     "database.dbname" : "postgres",
     "database.server.name": "postgres_source",
-    "table.include.list": "public.my_table",
+    "table.include.list": "public.demo_table",
     "slot.name": "postgres_debezium_source_slot",
     "publication.name": "postgres_debezium_source_publication"
   }

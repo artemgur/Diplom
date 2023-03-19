@@ -2,7 +2,7 @@ from aggregate_functions import Sum
 from aggregate_initializer import AggregateInitializer
 from groupby import Groupby
 
-from utilities.debug import print_separator
+from test_utilities.debug import print_separator
 
 groupby = Groupby('view1', groupby_columns=['a'], aggregate_initializers=[AggregateInitializer('b', Sum)])
 print('  a b')

@@ -8,7 +8,8 @@ from groupby import Groupby
 base_time = 0.1
 
 
-groupby = Groupby('view1', groupby_columns=['a'], aggregate_initializers=[AggregateInitializer('b', Sum), AggregateInitializer('c', Max)], extrapolation=True, extrapolation_method='linear')
+groupby = Groupby('view1', groupby_columns=['a'], aggregate_initializers=[AggregateInitializer('b', Sum), AggregateInitializer('c', Max)],
+                  extrapolation=True, extrapolation_method='quintic')
 groupby.insert({'a': 1, 'b': 1, 'c': 0})
 groupby.insert({'a': 2, 'b': -1, 'c': 0})
 for i in range(10):

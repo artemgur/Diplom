@@ -12,7 +12,7 @@ from utilities.empty_functions import empty_where_function
 def get_target(json_dict: dict) -> str:
     if query_type(json_dict) in ['CREATE SOURCE', 'DROP SOURCE']:
         return constants.MAIN_PROCESS_NAME
-    if query_type(json_dict) in ['CREATE VIEW', 'DROP VIEW']:
+    if query_type(json_dict) in ['CREATE MATERIALIZED VIEW', 'DROP MATERIALIZED VIEW']:
         return 'source.' + view_source_name(json_dict)
     else:
         return 'view.' + name(json_dict)
@@ -97,6 +97,11 @@ def orderby(json_dict: dict):
         else:
             result.append(OrderBy(column_name=orderby_, desc=False))
     return result
+
+
+def format(json_dict: dict):
+    return json_dict['format'] if 'format' in json_dict else 'csv'
+
 
 
 def error_decorator(func):

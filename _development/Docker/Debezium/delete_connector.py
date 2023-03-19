@@ -7,5 +7,5 @@ def delete_connector(connector_name):
 
 
 if __name__ == '__main__':
-    # delete_connector('postgres_debezium_source_connector')
-    delete_connector('postgres_sink_connector')
+    delete_connector('postgres_debezium_source_connector')
+    # delete_connector('postgres_sink_connector')

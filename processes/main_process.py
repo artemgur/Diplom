@@ -43,8 +43,8 @@ def run_queries(request_dict: dict, responses_dict: dict, queries_dict: dict, vi
     match json_api.query_type(request_dict):
         case 'CREATE SOURCE':
             create_source(request_dict, responses_dict, queries_dict, view_names)
-        case 'DROP SOURCE':
-            drop_source(request_dict, responses_dict)
+        # case 'DROP SOURCE':
+        #     drop_source(request_dict, responses_dict)
     # TODO drop
 
 
@@ -53,7 +53,10 @@ def create_source(request_dict: dict, responses_dict: dict, queries_dict: dict, 
     source_type_str = json_api.type(request_dict)
     name = json_api.name(request_dict)
     if name in sources_to_process:
-        raise ValueError(f'Source {name} already exists')
+        if sources_to_process[name].is_alive():
+            raise ValueError(f'Source {name} already exists')
+        else:
+            del sources_to_process[name]
     parameters = json_api.parameters(request_dict)
     # TODO
     source_type = utilities.reflection.str_to_type(source_type_str)
@@ -63,10 +66,6 @@ def create_source(request_dict: dict, responses_dict: dict, queries_dict: dict, 
     start_source_process(source, queries_dict, responses_dict, view_names)
     json_api.send_response('OK', request_dict, responses_dict)
 
-
-@json_api.error_decorator
-def drop_source(request_dict, responses_dict):
-    name = json_api.name(request_dict)
 
 
 

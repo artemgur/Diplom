@@ -18,7 +18,9 @@ import utilities.list
 class Groupby:
     # groupby_columns – list[str] (or maybe tuple[str]) of column names
     # _groupby_rows – dict. Key – tuple of values of groupby columns, values – list of aggregate functions
-    def __init__(self, name: str, groupby_columns: list[str], aggregate_initializers: list[AggregateInitializer], where=empty_where_function,
+    def __init__(self, name: str, groupby_columns: list[str], aggregate_initializers: list[AggregateInitializer],
+                 where=empty_where_function,
+                 append_only=False,
                  column_aliases=None,
                  extrapolation=False, extrapolation_method='linear', extrapolation_cache_size=100):
 
@@ -28,11 +30,13 @@ class Groupby:
 
 
         self._aggregate_initializers = aggregate_initializers
+        self._append_only = append_only
         self._extrapolation = extrapolation
         self._extrapolation_method = extrapolation_method
         self._extrapolation_cache_size = extrapolation_cache_size
-        self._groupby_rows = defaultdict(lambda: Group(aggregate_initializers)) if not self._extrapolation else \
-            defaultdict(lambda: GroupExtrapolation(aggregate_initializers, extrapolation_method=self._extrapolation_method, cache_size=self._extrapolation_cache_size))
+        self._groupby_rows = defaultdict(lambda: Group(aggregate_initializers, append_only=append_only)) if not self._extrapolation else \
+            defaultdict(lambda: GroupExtrapolation(aggregate_initializers, append_only=append_only,
+                                                   extrapolation_method=self._extrapolation_method, cache_size=self._extrapolation_cache_size))
         self._groupby_columns = groupby_columns
         self._where = where
         self._column_aliases = self._determine_column_aliases(column_aliases)
@@ -47,12 +51,18 @@ class Groupby:
         return True
 
     def delete(self, row):
+        if self.append_only:
+            raise ValueError(f'Attempted to delete an item from append-only materialized view {self.name}')
+
         groupby_values = tuple(row[key] for key in self._groupby_columns)
         self._groupby_rows[groupby_values].delete(row)
         return True
 
 
     def update(self, old_row, new_row):
+        if self.append_only:
+            raise ValueError(f'Attempted to update an item in append-only materialized view {self.name}')
+
         self.delete(old_row)
         self.insert(new_row)
 
@@ -90,6 +100,10 @@ class Groupby:
     @property
     def column_names(self):
         return self._column_aliases
+
+    @property
+    def append_only(self):
+        return self._append_only
 
 
     def _determine_column_aliases(self, column_aliases: list[str]):

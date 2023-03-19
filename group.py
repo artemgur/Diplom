@@ -3,9 +3,10 @@ from table_data import TableData
 
 
 class Group:
-    def __init__(self, agg_list_initializer: list[AggregateInitializer]):
+    def __init__(self, agg_list_initializer: list[AggregateInitializer], append_only=False):
         # Order shouldn't matter here
-        columns_to_cache = list(set(filter(lambda x: x is not None, map(lambda x: x.column_to_cache, agg_list_initializer))))
+        columns_to_cache = list(set(filter(lambda x: x is not None, map(lambda x: x.column_to_cache, agg_list_initializer)))) \
+                                if not append_only else []
 
         self._table_data = TableData(columns_to_cache)
 

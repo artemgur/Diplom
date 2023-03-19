@@ -12,6 +12,8 @@ class Avg(Aggregate):
         self._state = self._state[0] - value, self._state[1] - 1
 
     def get_result(self):
+        if self._state[1] == 0:
+            return 0  # Maybe None or NaN?
         return self._state[0] / self._state[1]
 
     @classmethod

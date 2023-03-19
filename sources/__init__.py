@@ -1,4 +1,6 @@
-# TODO convert to namespace package
+import utilities.class_loader
+
 from .base import Source
-from .debezium import DebeziumSource
-from .simple_test import SimpleTestSource
+
+
+utilities.class_loader.load(__file__, __name__, globals(), Source)
