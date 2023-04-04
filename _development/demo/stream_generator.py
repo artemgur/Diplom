@@ -8,7 +8,7 @@ table_name = 'demo_table'
 
 
 def insert(connection, cursor):
-    cursor.execute(f'INSERT INTO {table_name} VALUES (round(random() * 10), round(random() * 20), random() * 10)')
+    cursor.execute(f'INSERT INTO {table_name} VALUES (round(random() * 10), round(random() * 100), random() * 10)')
     connection.commit()
 
 
@@ -34,10 +34,10 @@ cursor.execute(f'TRUNCATE TABLE {table_name}')
 connection.commit()
 
 #while True:
-for j in range(100):
+for j in range(1000):
     for i in range(10):
         insert(connection, cursor)
     update(connection, cursor)
     delete(connection, cursor)
-    time.sleep(1)
+    time.sleep(3)
 

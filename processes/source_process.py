@@ -6,6 +6,7 @@ from constants import SLEEP_TIME_BETWEEN_QUERIES
 from groupby import Groupby
 from sources import Source
 import rows_formatter
+import utilities.list
 
 
 def run(source: Source, queries_dict: dict, responses_dict: dict, view_names: dict):
@@ -14,20 +15,28 @@ def run(source: Source, queries_dict: dict, responses_dict: dict, view_names: di
         source.listen()
         source_name = 'source.' + source.name
         if source_name in queries_dict:
-            request_dict = json.loads(queries_dict[source_name])
-            run_source_queries(source, request_dict, responses_dict, view_names)
-            del queries_dict[source_name]
+            queries = queries_dict[source_name]
+            for value in queries:
+                #queries_dict[source_name].remove(value)
+                request_dict = json.loads(value)
+                run_source_queries(source, request_dict, responses_dict, view_names)
+            queries_dict[source_name] = utilities.list.difference(queries_dict[source_name], queries)
+            #del queries_dict[source_name]
         for view in source.views:
             view_name = 'view.' + view.name
             if view_name in queries_dict:
-                request_dict = json.loads(queries_dict[view_name])
-                if json_api.query_type(request_dict) == 'DROP SOURCE':
-                    drop_source = True
-                    finalize_process(source, view_names)
-                    json_api.send_response('OK', request_dict, responses_dict)
-                else:
-                    run_queries(source, view, request_dict, responses_dict, view_names)
-                del queries_dict[view_name]
+                queries = queries_dict[view_name]
+                for value in queries:
+                    #queries_dict[view_name].remove(value)
+                    request_dict = json.loads(value)
+                    if json_api.query_type(request_dict) == 'DROP SOURCE':
+                        drop_source = True
+                        finalize_process(source, view_names)
+                        json_api.send_response('OK', request_dict, responses_dict)
+                    else:
+                        run_queries(source, view, request_dict, responses_dict, view_names)
+                queries_dict[view_name] = utilities.list.difference(queries_dict[view_name], queries)
+                #del queries_dict[view_name]
 
         if drop_source:
             break

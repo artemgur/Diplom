@@ -9,6 +9,7 @@ from . import source_process
 import constants
 from api import json_api
 import utilities.reflection
+import utilities.list
 from groupby import Groupby
 # TODO improve import
 import sources
@@ -32,9 +33,14 @@ def run():
 
     while True:
         if constants.MAIN_PROCESS_NAME in queries_dict:
-            request_dict = json.loads(queries_dict[constants.MAIN_PROCESS_NAME])
-            run_queries(request_dict, responses_dict, queries_dict, view_names)
-            del queries_dict[constants.MAIN_PROCESS_NAME]
+            queries = queries_dict[constants.MAIN_PROCESS_NAME]
+            for value in queries:
+                #queries_dict[constants.MAIN_PROCESS_NAME].remove(value)
+                #print(queries_dict[constants.MAIN_PROCESS_NAME])
+                request_dict = json.loads(value)
+                run_queries(request_dict, responses_dict, queries_dict, view_names)
+            #del queries_dict[constants.MAIN_PROCESS_NAME]
+            queries_dict[constants.MAIN_PROCESS_NAME] = utilities.list.difference(queries_dict[constants.MAIN_PROCESS_NAME], queries)
         time.sleep(constants.SLEEP_TIME_BETWEEN_QUERIES)
 
 

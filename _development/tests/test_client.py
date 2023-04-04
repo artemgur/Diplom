@@ -18,7 +18,9 @@ print_response(requests.post(f'http://localhost:{constants.SERVER_PORT}', json=c
 #print('Source created')
 print_response(requests.post(f'http://localhost:{constants.SERVER_PORT}', json=create_view))
 #print('View created')
-time.sleep(1)
-select_response = requests.post(f'http://localhost:{constants.SERVER_PORT}', json=select)
-print(select_response.content.decode())
+for i in range(3):
+    time.sleep(1)
+    select_response = requests.post(f'http://localhost:{constants.SERVER_PORT}', json=select)
+    print(select_response.content.decode())
+
 

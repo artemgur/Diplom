@@ -19,7 +19,8 @@ create_source = {'query_type': 'CREATE SOURCE',
 create_view = {'query_type': 'CREATE MATERIALIZED VIEW',
                'name': 'demo_view', 'view_source_name': 'demo_source', 'groupby_columns': ['a'],
                'parameters': {'extrapolation': True},
-               'aggregates': [{'function': 'Sum', 'column': 'b'}, {'function': 'Avg', 'column': 'c'}]}
+               'aggregates': [{'function': 'Sum', 'column': 'b'}, {'function': 'Avg', 'column': 'c'}, {'function': 'CountDistinct', 'column': 'b'},
+                              {'function': 'CountDistinctCBF', 'column': 'b', 'parameters': {'expected_element_count': 100, 'false_positive_probability': 0.01}}]}
 select = {'query_type': 'SELECT', 'name': 'demo_view', 'orderby': [['a', 'DESC']], 'format': 'tabulate'}
 print_response(requests.post(f'http://localhost:{constants.SERVER_PORT}', json=create_source))
 print('Source created')

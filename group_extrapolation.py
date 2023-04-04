@@ -13,7 +13,7 @@ extrapolation_method_min_points = {'linear': 0, 'cubic': 4, 'quintic': 6, 'pchip
 
 # TODO better name
 class GroupExtrapolation(Group):
-    def __init__(self, agg_list_initializer: list[AggregateInitializer], append_only=False, cache_size=100, extrapolation_method='linear'):
+    def __init__(self, agg_list_initializer: list[AggregateInitializer], append_only=False, cache_size=10, extrapolation_method='linear'):
         super().__init__(agg_list_initializer, append_only=append_only)
         self._aggregate_cache = deque()
         self._aggregate_cache_timestamps = deque()
@@ -40,8 +40,14 @@ class GroupExtrapolation(Group):
 
     def _update_cache(self):
         aggregate_values = list(map(lambda x: x.aggregate.get_result(), self._aggregate_list)) + [0] * self._padding
+
+        current_time = time.time()
+        if len(self._aggregate_cache_timestamps) > 0 and self._aggregate_cache_timestamps[-1] == current_time:
+            self._aggregate_cache.pop()
+            self._aggregate_cache_timestamps.pop()
+
         self._aggregate_cache.append(aggregate_values)
-        self._aggregate_cache_timestamps.append(time.time())
+        self._aggregate_cache_timestamps.append(current_time)
         if len(self._aggregate_cache) > self._cache_size:
             self._aggregate_cache.popleft()
             self._aggregate_cache_timestamps.popleft()

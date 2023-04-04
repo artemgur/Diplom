@@ -43,7 +43,7 @@ class CountableBloomFilter(Generic[T]):  # TODO rename to CountingBloomFilter?
 
     def remove(self, element: T) -> bool:
         contains_result = self.__contains(element)
-        if contains_result[0]:
+        if not contains_result[0]:
             return False
         element_hash = contains_result[1]
         #self.__elements_count -= 1
@@ -56,7 +56,7 @@ class CountableBloomFilter(Generic[T]):  # TODO rename to CountingBloomFilter?
         element_hash = self.__hash_element(element)
         for i in element_hash:
             if self.__bloom_filter[i] == 0:
-                return False
+                return False, None
         return True, element_hash
 
 

@@ -6,6 +6,7 @@ import uuid
 import time
 
 import constants
+import queries_dict_manager
 from api import json_api
 
 class ThreadingServer(ThreadingMixIn, HTTPServer):
@@ -33,7 +34,8 @@ class Handler(BaseHTTPRequestHandler):
         target = json_api.get_target(json_dict)
         # For test_multiple_clients.py
         #print('    Target', target, 'request uuid', request_uuid)
-        self._queries_dict[target] = json_str
+        queries_dict_manager.add(self._queries_dict, target, json_str)
+        #self._queries_dict[target] = json_str
         while request_uuid not in self._responses_dict:
             time.sleep(0.1)
         response: str = self._responses_dict[request_uuid]

@@ -19,6 +19,10 @@ def index_many(l: list, indexes: list):
     return result
 
 
+def difference(a: list, b: list):
+    return list(set(a) - set(b))
+
+
 # def pad_left(l: list, padding_element, pad_length: int):
 #     new_elements_count = max(pad_length - len(l), 0)
 #     return [padding_element] * new_elements_count + l
