@@ -9,10 +9,10 @@ from orderby import OrderBy
 from utilities.empty_functions import empty_where_function
 
 
-def get_target(json_dict: dict) -> str:
+def get_target(json_dict: dict, view_names_dict: dict) -> str:
     if query_type(json_dict) in ['CREATE SOURCE', 'DROP SOURCE']:
         return constants.MAIN_PROCESS_NAME
-    if query_type(json_dict) in ['CREATE MATERIALIZED VIEW', 'DROP MATERIALIZED VIEW']:
+    if query_type(json_dict) in ['CREATE MATERIALIZED VIEW']:
         return 'source.' + view_source_name(json_dict)
     else:
         return 'view.' + name(json_dict)

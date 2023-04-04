@@ -28,7 +28,7 @@ def run():
     responses_dict = manager.dict()
     view_names = manager.dict()
 
-    server_process = Process(target=server.start_handler, args=(queries_dict, responses_dict))
+    server_process = Process(target=server.start_handler, args=(queries_dict, responses_dict, view_names))
     server_process.start()
 
     while True:

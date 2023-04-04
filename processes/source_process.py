@@ -9,7 +9,11 @@ import rows_formatter
 import utilities.list
 
 
+views_to_drop = {}
+
+
 def run(source: Source, queries_dict: dict, responses_dict: dict, view_names: dict):
+    global views_to_drop
     drop_source = False
     while True:
         source.listen()
@@ -37,6 +41,10 @@ def run(source: Source, queries_dict: dict, responses_dict: dict, view_names: di
                         run_queries(source, view, request_dict, responses_dict, view_names)
                 queries_dict[view_name] = utilities.list.difference(queries_dict[view_name], queries)
                 #del queries_dict[view_name]
+        for view_name in views_to_drop:
+            request_dict, view = views_to_drop[view_name]
+            drop_view_actual(request_dict, responses_dict, source, view, view_names)
+        views_to_drop = {}
 
         if drop_source:
             break
@@ -52,10 +60,8 @@ def run_source_queries(source: Source, request_dict: dict, responses_dict: dict,
 
 def run_queries(source: Source, view: Groupby, request_dict: dict, responses_dict: dict, view_names: dict):
     match json_api.query_type(request_dict):
-        case 'SELECT':
+        case 'SELECT' | 'SELECT EXTRAPOLATED':
             select(request_dict, responses_dict, view)
-        case 'SELECT EXTRAPOLATED':
-            select_extrapolated(request_dict, responses_dict, view)
         case 'DROP MATERIALIZED VIEW':
             drop_view(request_dict, responses_dict, source, view, view_names)
 
@@ -78,8 +84,13 @@ def create_view(request_dict: dict, responses_dict: dict, source: Source, view_n
     source.subscribe(view)
     json_api.send_response('OK', request_dict, responses_dict)
 
-@json_api.error_decorator
+
 def drop_view(request_dict: dict, responses_dict: dict, source: Source, view: Groupby, view_names: dict):
+    views_to_drop[view.name] = (request_dict, view)
+
+
+@json_api.error_decorator
+def drop_view_actual(request_dict: dict, responses_dict: dict, source: Source, view: Groupby, view_names: dict):
     name = json_api.name(request_dict)
     source.unsubscribe(view)
     del view_names[name]
@@ -91,10 +102,13 @@ def select(request_dict: dict, responses_dict: dict, view: Groupby):
     columns = json_api.columns(request_dict)
     where = json_api.select_where(request_dict, view.column_names)
     orderby_list = json_api.orderby(request_dict)
-    # TODO where having, order by
-    # TODO better result format
-    #result = str(view)
-    rows = view.select(column_names=columns, where=where)
+
+    if json_api.query_type(request_dict) == 'SELECT EXTRAPOLATED':
+        extrapolation_timestamp = json_api.extrapolation_timestamp(request_dict)
+        rows = view.select_extrapolated(column_names=columns, where=where, extrapolation_timestamp=extrapolation_timestamp)
+    else:
+        rows = view.select(column_names=columns, where=where)
+
     if len(orderby_list) > 0:
         rows = view.orderby(column_names=columns, rows=rows, orderby_list=orderby_list)
     if columns is None:
@@ -102,19 +116,6 @@ def select(request_dict: dict, responses_dict: dict, view: Groupby):
     result = rows_formatter.format(rows, column_names=columns, format_type=json_api.format(request_dict))
     json_api.send_response(result, request_dict, responses_dict)
 
-@json_api.error_decorator
-def select_extrapolated(request_dict: dict, responses_dict: dict, view: Groupby):
-    columns = json_api.columns(request_dict)
-    where = json_api.select_where(request_dict, view.column_names)
-    # TODO where having, order by
-    # TODO better result format
-    #result = str(view)
-    extrapolation_timestamp = json_api.extrapolation_timestamp(request_dict)
-    rows = view.select_extrapolated(column_names=columns, where=where, extrapolation_timestamp=extrapolation_timestamp)
-    if columns is None:
-        columns = view.column_names
-    result = rows_formatter.format(rows, column_names=columns, format_type=json_api.format(request_dict))
-    json_api.send_response(result, request_dict, responses_dict)
 
 
 def finalize_process(source: Source, view_names: dict):
