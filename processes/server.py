@@ -32,7 +32,7 @@ class Handler(BaseHTTPRequestHandler):
         json_dict = json.loads(content)
         json_dict['request_uuid'] = request_uuid
         json_str = json.dumps(json_dict, ensure_ascii=False)
-        target = json_api.get_target(json_dict, self._view_names_dict)
+        target = json_api.get_target(json_dict)
         # For test_multiple_clients.py
         #print('    Target', target, 'request uuid', request_uuid)
         queries_dict_manager.add(self._queries_dict, target, json_str)

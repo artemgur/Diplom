@@ -1,7 +1,7 @@
 if __name__ == '__main__':
     import processes.main_process
 
-    processes.main_process.run()
+    processes.main_process.start_main_process()
 
 # from sources import *
 #

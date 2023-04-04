@@ -9,7 +9,7 @@ from orderby import OrderBy
 from utilities.empty_functions import empty_where_function
 
 
-def get_target(json_dict: dict, view_names_dict: dict) -> str:
+def get_target(json_dict: dict) -> str:
     if query_type(json_dict) in ['CREATE SOURCE', 'DROP SOURCE']:
         return constants.MAIN_PROCESS_NAME
     if query_type(json_dict) in ['CREATE MATERIALIZED VIEW']:
@@ -105,20 +105,11 @@ def format(json_dict: dict):
 
 
 def error_decorator(func):
-    def wrapper(arg1, arg2, *args, **kwargs):
-        if isinstance(arg1, dict):
-            # Main process
-            request_dict = arg1
-            responses_dict = arg2
-        else:
-            # Source process
-            # arg1 is SourceProcess object
-            request_dict = arg2
-            responses_dict = arg1.responses_dict
-
+    def wrapper(process, request_dict, *args, **kwargs):
+        responses_dict = process.responses_dict
 
         try:
-            func(arg1, arg2, *args, **kwargs)
+            func(process, request_dict, *args, **kwargs)
         except Exception as e:
             send_response(str(e), request_dict, responses_dict, success=False)
             traceback.print_exc()
