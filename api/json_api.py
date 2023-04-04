@@ -105,9 +105,20 @@ def format(json_dict: dict):
 
 
 def error_decorator(func):
-    def wrapper(request_dict: dict, responses_dict: dict, *args, **kwargs):
+    def wrapper(arg1, arg2, *args, **kwargs):
+        if isinstance(arg1, dict):
+            # Main process
+            request_dict = arg1
+            responses_dict = arg2
+        else:
+            # Source process
+            # arg1 is SourceProcess object
+            request_dict = arg2
+            responses_dict = arg1.responses_dict
+
+
         try:
-            func(request_dict, responses_dict, *args, **kwargs)
+            func(arg1, arg2, *args, **kwargs)
         except Exception as e:
             send_response(str(e), request_dict, responses_dict, success=False)
             traceback.print_exc()
