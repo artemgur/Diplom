@@ -1,8 +1,3 @@
-import signal
-import subprocess
-import os
-
-
 def print_response(r, prefix=None):
     """
     Pretty-prints response of requests library in following format:
@@ -32,17 +27,3 @@ def print_tables_side_by_side(table1: str, table2: str, header1: str, header2: s
     merged = '\n'.join(map(lambda x: x[0] + ' ' * spaces_between_tables + x[1], zip(split1, split2)))
     header = header1.ljust(len(split1[0])) + ' ' * spaces_between_tables + header2.ljust(len(split2[0])) + '\n'
     print(header + merged)
-
-
-def terminate_shell_subprocess(process):
-    """
-    Terminates subprocess started with shell=True.
-
-    Necessary, as process.kill() and process.terminate() don't work when subprocess was started with shell=True.
-    """
-    if os.name == 'nt':
-        # Windows
-        subprocess.Popen(f"TASKKILL /F /PID {process.pid} /T")
-    else:
-        # Linux (not tested)
-        os.kill(process.pid, signal.SIGTERM)

@@ -22,7 +22,7 @@ class SourceProcess:
         self.view_names = view_names
 
         self.views_to_drop = {}
-        self.drop_source = False
+        self.drop_source_request_dict = None
 
 
     def run(self):
@@ -34,7 +34,8 @@ class SourceProcess:
 
             self.finalize_drop_view_queries()
 
-            if self.drop_source:
+            if self.drop_source_request_dict:
+                self.finalize_drop_source(self.drop_source_request_dict)
                 break
 
             time.sleep(SLEEP_TIME_BETWEEN_QUERIES)
@@ -63,12 +64,7 @@ class SourceProcess:
                 queries = self.queries_dict[view_name]
                 for value in queries:
                     request_dict = json.loads(value)
-                    if json_api.query_type(request_dict) == 'DROP SOURCE':
-                        self.drop_source = True
-                        self.finalize_process()
-                        json_api.send_response('OK', request_dict, self.responses_dict)
-                    else:
-                        self.run_view_query(request_dict, view)
+                    self.run_view_query(request_dict, view)
                 self.queries_dict[view_name] = utilities.list.difference(self.queries_dict[view_name], queries)
 
 
@@ -91,6 +87,8 @@ class SourceProcess:
         match json_api.query_type(request_dict):
             case 'CREATE MATERIALIZED VIEW':
                 self.create_view(request_dict)
+            case 'DROP SOURCE':
+                self.drop_source(request_dict)
 
 
     def run_view_query(self, request_dict: dict, view: Groupby):
@@ -135,6 +133,14 @@ class SourceProcess:
         self.views_to_drop[view.name] = (request_dict, view)
 
 
+    def drop_source(self, request_dict: dict):
+        """
+        Executes DROP SOURCE query.
+
+        Actually just marks the source for deletion, actual deletion is performed in self.finalize_drop_source()
+        """
+        self.drop_source_request_dict = request_dict
+
     @json_api.error_decorator
     def drop_view_finalize(self, request_dict: dict, view: Groupby):
         """
@@ -171,10 +177,13 @@ class SourceProcess:
         json_api.send_response(result, request_dict, self.responses_dict)
 
 
-
-    def finalize_process(self):
+    @json_api.error_decorator
+    def finalize_drop_source(self, request_dict: dict):
         """
         Finalizes the SourceProcess.
         """
         for view in self.source.views:
             del self.view_names[view.name]
+        json_api.send_response('OK', request_dict, self.responses_dict)
+
+

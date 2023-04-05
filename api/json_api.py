@@ -10,12 +10,15 @@ from utilities.empty_functions import empty_where_function
 
 
 def get_target(json_dict: dict) -> str:
-    if query_type(json_dict) in ['CREATE SOURCE', 'DROP SOURCE']:
+    if query_type(json_dict) in ['CREATE SOURCE']:
         return constants.MAIN_PROCESS_NAME
     if query_type(json_dict) in ['CREATE MATERIALIZED VIEW']:
         return 'source.' + view_source_name(json_dict)
-    else:
+    if query_type(json_dict) in ['DROP SOURCE']:
+        return 'source.' + name(json_dict)
+    if query_type(json_dict) in ['SELECT', 'SELECT EXTRAPOLATED', 'DROP MATERIALIZED VIEW']:
         return 'view.' + name(json_dict)
+    # TODO
 
 def query_type(json_dict: dict) -> str:
     return json_dict['query_type'].upper()

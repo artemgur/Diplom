@@ -12,7 +12,6 @@ from api import json_api
 class ThreadingServer(ThreadingMixIn, HTTPServer):
     pass
 
-# TODO support multiple simultaneous commands to one target (dicts should contain lists of requests, not individual requests)
 # Make it async using aiohttp?
 # ThreadingMixIn?
 class Handler(BaseHTTPRequestHandler):
