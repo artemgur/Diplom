@@ -1,5 +1,5 @@
 from aggregate_initializer import AggregateInitializer, AggregateTuple
-from table_data import TableData
+from group_cache import GroupCache
 
 
 class Group:
@@ -8,7 +8,7 @@ class Group:
         columns_to_cache = list(set(filter(lambda x: x is not None, map(lambda x: x.column_to_cache, agg_list_initializer)))) \
                                 if not append_only else []
 
-        self._table_data = TableData(columns_to_cache)
+        self._table_data = GroupCache(columns_to_cache)
 
         aggregate_cache_lambdas = map(lambda x: self._table_data.get_column_lambda(x.column_to_cache), agg_list_initializer)
 

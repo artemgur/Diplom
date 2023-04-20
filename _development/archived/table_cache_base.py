@@ -1,11 +1,11 @@
-from groupby import Groupby
+from materialized_view import MaterializedView
 from utilities.empty_functions import empty_where_function
 
 
 # TODO type conversion
 # Bridge pattern
 class TableCacheBase:
-    def __init__(self, groupby: Groupby, where_condition=empty_where_function):
+    def __init__(self, groupby: MaterializedView, where_condition=empty_where_function):
         self._groupby = groupby
         self._where_condition = where_condition
 

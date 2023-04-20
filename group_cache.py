@@ -1,7 +1,7 @@
 from utilities.list import are_lists_equal
 
 
-class TableData:
+class GroupCache:
     def __init__(self, column_names: list[str]):
         self._column_indexes = {column_names[i]: i for i in range(len(column_names))}
         self._rows = []

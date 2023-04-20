@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from groupby import Groupby
+from materialized_view import MaterializedView
 
 
 # TODO Add Clickhouse Kafka source?
@@ -8,13 +8,13 @@ class Source(ABC):
     def __init__(self, name, **kwargs):
         self._name = name
         #sources[name] = self
-        self._subscribed_materialized_views: set[Groupby] = set()
+        self._subscribed_materialized_views: set[MaterializedView] = set()
 
 
-    def subscribe(self, materialized_view: Groupby):
+    def subscribe(self, materialized_view: MaterializedView):
         self._subscribed_materialized_views.add(materialized_view)
 
-    def unsubscribe(self, materialized_view: Groupby):
+    def unsubscribe(self, materialized_view: MaterializedView):
         self._subscribed_materialized_views.remove(materialized_view)
 
 

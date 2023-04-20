@@ -1,7 +1,7 @@
 from sources.debezium import DebeziumSource
 from aggregate_functions import Sum, Avg, Max, Min
 from aggregate_initializer import AggregateInitializer
-from groupby import Groupby
+from materialized_view import MaterializedView
 from sources.base import sources
 
 from multiprocess import Manager, Process
@@ -15,10 +15,10 @@ def process1(namespace):
 
     #global sources
 
-    groupby = Groupby(groupby_columns=['b'], aggregate_initializers=[AggregateInitializer('a', Sum),
-                                                                     AggregateInitializer('a', Max),
-                                                                     AggregateInitializer('a', Min),
-                                                                     AggregateInitializer('c', Avg)])
+    groupby = MaterializedView(groupby_columns=['b'], aggregate_initializers=[AggregateInitializer('a', Sum),
+                                                                              AggregateInitializer('a', Max),
+                                                                              AggregateInitializer('a', Min),
+                                                                              AggregateInitializer('c', Avg)])
 
     source.subscribe(groupby)
 

@@ -3,7 +3,7 @@ import time
 
 from api import json_api
 from constants import SLEEP_TIME_BETWEEN_QUERIES
-from groupby import Groupby
+from materialized_view import MaterializedView
 from sources import Source
 import rows_formatter
 import utilities.list
@@ -91,7 +91,7 @@ class SourceProcess:
                 self.drop_source(request_dict)
 
 
-    def run_view_query(self, request_dict: dict, view: Groupby):
+    def run_view_query(self, request_dict: dict, view: MaterializedView):
         """
         Maps view queries to relevant functions.
         """
@@ -115,8 +115,8 @@ class SourceProcess:
         parameters = json_api.parameters(request_dict)
         column_aliases = json_api.column_aliases(request_dict)
         aggregate_initializers = json_api.aggregate_initializers(request_dict)
-        view = Groupby(name=name, groupby_columns=groupby_columns, aggregate_initializers=aggregate_initializers,
-                       where=where, column_aliases=column_aliases, **parameters)
+        view = MaterializedView(name=name, groupby_columns=groupby_columns, aggregate_initializers=aggregate_initializers,
+                                where=where, column_aliases=column_aliases, **parameters)
         self.view_names[name] = 1
         #source_name = json_api.view_source_name(request_dict)
         #source = sources.base.sources[source_name]
@@ -124,7 +124,7 @@ class SourceProcess:
         json_api.send_response('OK', request_dict, self.responses_dict)
 
 
-    def drop_view(self, request_dict: dict, view: Groupby):
+    def drop_view(self, request_dict: dict, view: MaterializedView):
         """
         Executes DROP MATERIALIZED VIEW query.
 
@@ -142,7 +142,7 @@ class SourceProcess:
         self.drop_source_request_dict = request_dict
 
     @json_api.error_decorator
-    def drop_view_finalize(self, request_dict: dict, view: Groupby):
+    def drop_view_finalize(self, request_dict: dict, view: MaterializedView):
         """
         Finalizes DROP MATERIALIZED VIEW query.
         """
@@ -153,7 +153,7 @@ class SourceProcess:
 
 
     @json_api.error_decorator
-    def select(self, request_dict: dict, view: Groupby):
+    def select(self, request_dict: dict, view: MaterializedView):
         """
         Executes SELECT or SELECT EXTRAPOLATED query.
         """

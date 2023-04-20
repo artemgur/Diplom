@@ -8,7 +8,7 @@ import constants
 from api import json_api
 import utilities.reflection
 import utilities.list
-from groupby import Groupby
+from materialized_view import MaterializedView
 # TODO improve import
 import sources
 from sources import *

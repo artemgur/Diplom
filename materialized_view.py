@@ -15,7 +15,7 @@ import utilities.list
 
 # TODO optional ordered storage?
 # It should be easy to make ordered storage based on groupby column, but harder – based on aggregate
-class Groupby:
+class MaterializedView:
     # groupby_columns – list[str] (or maybe tuple[str]) of column names
     # _groupby_rows – dict. Key – tuple of values of groupby columns, values – list of aggregate functions
     def __init__(self, name: str, groupby_columns: list[str], aggregate_initializers: list[AggregateInitializer],
