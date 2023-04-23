@@ -1,4 +1,4 @@
-from aggregate_initializer import AggregateInitializer, AggregateTuple
+from aggregate_initializer import AggregateInitializer, AggregateInstance
 from group_cache import GroupCache
 
 
@@ -10,9 +10,9 @@ class Group:
 
         self._table_data = GroupCache(columns_to_cache)
 
-        aggregate_cache_lambdas = map(lambda x: self._table_data.get_column_lambda(x.column_to_cache), agg_list_initializer)
+        aggregate_cache_lambdas = map(lambda x: self._table_data.get_column_callable(x.column_to_cache), agg_list_initializer)
 
-        self._aggregate_list: list[AggregateTuple] = \
+        self._aggregate_list: list[AggregateInstance] = \
             [aggregate_initializer.init_aggregate(column_cache=aggregate_lambda) for aggregate_initializer, aggregate_lambda
                 in zip(agg_list_initializer, aggregate_cache_lambdas)]
 # TODO:
@@ -27,7 +27,7 @@ class Group:
         for i, aggregate_tuple in enumerate(self._aggregate_list):
             self._aggregate_list[i].aggregate.insert(row[aggregate_tuple.column_name])
 
-    def delete(self, row):
+    def delete(self, row) -> bool:
         delete_actually_removed_row = self._table_data.delete(row)
         if delete_actually_removed_row:
             for i, aggregate_tuple in enumerate(self._aggregate_list):
@@ -39,5 +39,5 @@ class Group:
     #    self.delete(old_row)
     #    self.insert(new_row)
 
-    def get_result(self):
+    def get_result(self) -> list:
         return list(map(lambda aggregate_tuple: aggregate_tuple.aggregate.get_result(), self._aggregate_list))

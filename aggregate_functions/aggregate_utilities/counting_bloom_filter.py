@@ -7,11 +7,7 @@ from .km_hasher import KMHasher
 T = TypeVar('T')
 
 
-# TODO change implementation
-# Вычислять количество элементов по формуле из Википедии!
-
-
-class CountableBloomFilter(Generic[T]):  # TODO rename to CountingBloomFilter?
+class CountingBloomFilter(Generic[T]):  # TODO rename to CountingBloomFilter?
     def __init__(self, length: int, hasher: KMHasher):
         self.__hasher = hasher
         self.__bloom_filter = [0] * length
@@ -23,7 +19,7 @@ class CountableBloomFilter(Generic[T]):  # TODO rename to CountingBloomFilter?
         length = get_optimal_length(expected_elements_count, false_positive_probability)
         hash_functions_count = get_optimal_hash_functions_count(length, expected_elements_count)
         hasher = KMHasher(hash_functions_count, hash_func1, hash_func2)
-        return CountableBloomFilter(length, hasher)
+        return CountingBloomFilter(length, hasher)
 
 
     def __hash_element(self, element: T) -> set[int]:

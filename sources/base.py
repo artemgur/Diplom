@@ -18,7 +18,7 @@ class Source(ABC):
         self._subscribed_materialized_views.remove(materialized_view)
 
 
-    def _update_materialized_views(self, old_row: dict, new_row: dict):
+    def _update_materialized_views(self, old_row: dict | None, new_row: dict | None):
         if old_row is None:  # Insert
             if new_row is None:
                 raise ValueError("old_row and new_row can't both be None")

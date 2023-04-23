@@ -1,6 +1,13 @@
 from dataclasses import dataclass
+from typing import Callable
 
 from aggregate_functions import Aggregate
+
+
+@dataclass(frozen=True)
+class AggregateInstance:
+    column_name: str
+    aggregate: Aggregate
 
 
 class AggregateInitializer:
@@ -17,20 +24,17 @@ class AggregateInitializer:
         return self._aggregate_type.function_name() + '(' + self._column_name + ')'
 
 
-    def init_aggregate(self, column_cache):
-        return AggregateTuple(column_name=self._column_name, aggregate=self._aggregate_type(**self._init_parameters, column_cache=column_cache))
+    def init_aggregate(self, column_cache: Callable) -> AggregateInstance:
+        return AggregateInstance(column_name=self._column_name, aggregate=self._aggregate_type(**self._init_parameters, column_cache=column_cache))
 
 
     @property
-    def column_to_cache(self):
+    def column_to_cache(self) -> str | None:
         # TODO combine cache
         if self._aggregate_type.needs_column_cache():
             return self._column_name
         return None
 
 
-@dataclass(frozen=True)
-class AggregateTuple:
-    column_name: str
-    aggregate: Aggregate
+
 

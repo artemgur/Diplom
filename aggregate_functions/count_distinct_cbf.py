@@ -1,5 +1,5 @@
 from . import Aggregate
-from .aggregate_utilities.countable_bloom_filter import CountableBloomFilter
+from .aggregate_utilities.counting_bloom_filter import CountingBloomFilter
 from .aggregate_utilities import hash_functions
 
 
@@ -8,7 +8,7 @@ class CountDistinctCBF(Aggregate):
         if state is not None:  # TODO do something better about state?
             raise ValueError('state parameter is not supported in CountDistinctCBF')
         super().__init__(state=state, column_cache=column_cache)
-        self._state = CountableBloomFilter.create(expected_element_count, false_positive_probability, hash_functions.sha256, hash_functions.md5)
+        self._state = CountingBloomFilter.create(expected_element_count, false_positive_probability, hash_functions.sha256, hash_functions.md5)
 
 
 

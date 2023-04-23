@@ -7,8 +7,8 @@ class GroupCache:
         self._rows = []
 
     def insert(self, row: dict):
-        if len(self._column_indexes) == 0:
-            return
+        #if len(self._column_indexes) == 0:
+        #    return
 
         new_row_list = self._row_dict_to_list(row)
 
@@ -49,7 +49,7 @@ class GroupCache:
         for row in self._rows:
             yield row[column_index]
 
-    def get_column_lambda(self, column_name: str):
+    def get_column_callable(self, column_name: str):
         if column_name is None:
             return None
         return lambda: self.get_column(column_name)

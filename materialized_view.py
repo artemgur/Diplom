@@ -77,16 +77,17 @@ class MaterializedView:
             yield list(key) + value.get_result()
 
 
-    def extrapolate(self, extrapolation_timestamp=None):
+    def _extrapolate(self, extrapolation_timestamp=None):
         if extrapolation_timestamp is None:
             extrapolation_timestamp = time.time()
         if not self._extrapolation:
             raise ValueError('Attempted to extrapolate a groupby in which extrapolation is not enabled')
         for key, value in self._groupby_rows.items():
+            # noinspection PyUnresolvedReferences
             yield list(key) + value.extrapolate(extrapolation_timestamp)
 
     def to_string_extrapolated(self, extrapolation_timestamp=None):
-        return tabulate(self.extrapolate(extrapolation_timestamp), headers=self.column_names, tablefmt=constants.TABULATE_FORMAT)
+        return tabulate(self._extrapolate(extrapolation_timestamp), headers=self.column_names, tablefmt=constants.TABULATE_FORMAT)
 
 
     @property
@@ -115,7 +116,7 @@ class MaterializedView:
         return column_names
 
 
-    def _select(self, input_rows, column_names=None, where=empty_where_function):
+    def _select(self, input_rows, column_names=None, where=empty_where_function) -> Iterable:
         #if column_names is None:
         #    column_names = self.column_names
         where_rows = filter(lambda x: where(*x), input_rows)
@@ -126,7 +127,7 @@ class MaterializedView:
         return rows
 
 
-    def orderby(self, column_names: list[str], rows: Iterable, orderby_list: list[OrderBy]):
+    def orderby(self, column_names: list[str], rows: Iterable, orderby_list: list[OrderBy]) -> list:
         if column_names is None:
             column_names = self.column_names
 
@@ -138,11 +139,11 @@ class MaterializedView:
 
 
 
-    def select(self, column_names=None, where=empty_where_function):
+    def select(self, column_names=None, where=empty_where_function) -> Iterable:
         return self._select(self.get_rows(), column_names, where)
 
-    def select_extrapolated(self, column_names=None, where=empty_where_function, extrapolation_timestamp=None):
-        rows = self.extrapolate(extrapolation_timestamp=extrapolation_timestamp)
+    def select_extrapolated(self, column_names=None, where=empty_where_function, extrapolation_timestamp=None) -> Iterable:
+        rows = self._extrapolate(extrapolation_timestamp=extrapolation_timestamp)
         return self._select(rows, column_names, where)
 
 
@@ -150,11 +151,11 @@ class MaterializedView:
         return tabulate(self.get_rows(), headers=self.column_names, tablefmt=constants.TABULATE_FORMAT)
 
 
-    # To store groupbys in sets
+    # To store materialized views in sets
     def __eq__(self, other):
         return self._name == other.name
 
 
-    # To store groupbys in sets
+    # To store materialized views in sets
     def __hash__(self):
         return hash(self._name)

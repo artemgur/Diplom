@@ -1,6 +1,9 @@
 # https://stackoverflow.com/a/40343867
+from typing import Callable
+
+
 class KMHasher:
-    def __init__(self, hash_func_count, hash_func1, hash_func2):
+    def __init__(self, hash_func_count, hash_func1: Callable, hash_func2: Callable):
         if hash_func_count < 1:
             raise ValueError('Hash functions count must be at least 1')
 
