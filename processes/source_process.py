@@ -164,7 +164,9 @@ class SourceProcess:
         if json_api.query_type(request_dict) == 'SELECT EXTRAPOLATED':
             # SELECT EXTRAPOLATED query
             extrapolation_timestamp = json_api.extrapolation_timestamp(request_dict)
-            rows = view.select_extrapolated(column_names=columns, where=where, extrapolation_timestamp=extrapolation_timestamp)
+            extrapolation_offset = json_api.extrapolation_offset(request_dict)
+            rows = view.select_extrapolated(column_names=columns, where=where,
+                                            extrapolation_timestamp=extrapolation_timestamp, extrapolation_offset=extrapolation_offset)
         else:
             # SELECT query
             rows = view.select(column_names=columns, where=where)

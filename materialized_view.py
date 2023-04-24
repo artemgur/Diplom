@@ -77,14 +77,12 @@ class MaterializedView:
             yield list(key) + value.get_result()
 
 
-    def _extrapolate(self, extrapolation_timestamp=None):
-        if extrapolation_timestamp is None:
-            extrapolation_timestamp = time.time()
+    def _extrapolate(self, extrapolation_timestamp=None, extrapolation_offset=None):
         if not self._extrapolation:
             raise ValueError('Attempted to extrapolate a groupby in which extrapolation is not enabled')
         for key, value in self._groupby_rows.items():
             # noinspection PyUnresolvedReferences
-            yield list(key) + value.extrapolate(extrapolation_timestamp)
+            yield list(key) + value.extrapolate(extrapolation_timestamp=extrapolation_timestamp, extrapolation_offset=extrapolation_offset)
 
     def to_string_extrapolated(self, extrapolation_timestamp=None):
         return tabulate(self._extrapolate(extrapolation_timestamp), headers=self.column_names, tablefmt=constants.TABULATE_FORMAT)
@@ -142,8 +140,8 @@ class MaterializedView:
     def select(self, column_names=None, where=empty_where_function) -> Iterable:
         return self._select(self.get_rows(), column_names, where)
 
-    def select_extrapolated(self, column_names=None, where=empty_where_function, extrapolation_timestamp=None) -> Iterable:
-        rows = self._extrapolate(extrapolation_timestamp=extrapolation_timestamp)
+    def select_extrapolated(self, column_names=None, where=empty_where_function, extrapolation_timestamp=None, extrapolation_offset=None) -> Iterable:
+        rows = self._extrapolate(extrapolation_timestamp=extrapolation_timestamp, extrapolation_offset=extrapolation_offset)
         return self._select(rows, column_names, where)
 
 

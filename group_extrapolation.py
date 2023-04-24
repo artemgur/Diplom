@@ -8,7 +8,7 @@ from aggregate_initializer import AggregateInitializer
 from group import Group
 
 
-extrapolation_method_min_points = {'linear': 0, 'cubic': 4, 'quintic': 6, 'pchip': 4}
+extrapolation_method_min_points = {'linear': 0, 'slinear': 0, 'cubic': 4, 'quintic': 6, 'pchip': 4}
 
 
 # TODO better name
@@ -53,7 +53,9 @@ class GroupExtrapolation(Group):
             self._aggregate_cache_timestamps.popleft()
 
 
-    def extrapolate(self, extrapolation_timestamp=None):
+    def extrapolate(self, extrapolation_timestamp=None, extrapolation_offset=None):
+        if extrapolation_offset is not None:
+            extrapolation_timestamp = self._aggregate_cache_timestamps[-1] + extrapolation_offset
         if extrapolation_timestamp is None:
             extrapolation_timestamp = time.time()
 

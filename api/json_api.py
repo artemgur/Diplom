@@ -88,6 +88,10 @@ def extrapolation_timestamp(json_dict: dict):
     return json_dict['extrapolation_timestamp'] if 'extrapolation_timestamp' in json_dict else None
 
 
+def extrapolation_offset(json_dict: dict):
+    return json_dict['extrapolation_offset'] if 'extrapolation_offset' in json_dict else None
+
+
 def orderby(json_dict: dict):
     if 'orderby' not in json_dict:
         return []

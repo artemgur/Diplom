@@ -9,8 +9,9 @@ table_name = 'demo_table'
 
 
 def insert(connection, cursor):
-    generated_b = numpy.random.normal() * 10
-    cursor.execute(f'INSERT INTO {table_name} VALUES (round(random() * 10), {generated_b}, random() * 10)')
+    generated_b = int(numpy.random.normal() * 10)
+    generated_c = abs(numpy.random.normal() * 3)
+    cursor.execute(f'INSERT INTO {table_name} VALUES (round(random() * 5), {generated_b}, {generated_c})')
     connection.commit()
 
 
@@ -30,7 +31,7 @@ def delete(connection, cursor):
 
 
 
-connection = psycopg2.connect(dbname='postgres', user='postgres', password='postgres', host='localhost', port=5432)
+connection = psycopg2.connect(dbname='postgres', user='postgres', password='postgres', host='127.0.0.1', port=5432)
 cursor = connection.cursor()
 cursor.execute(f'TRUNCATE TABLE {table_name}')
 connection.commit()
@@ -39,7 +40,7 @@ connection.commit()
 for j in range(1000):
     for i in range(10):
         insert(connection, cursor)
-    update(connection, cursor)
-    delete(connection, cursor)
+    #update(connection, cursor)
+    #delete(connection, cursor)
     time.sleep(3)
 
