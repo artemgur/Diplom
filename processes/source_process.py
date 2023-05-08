@@ -96,7 +96,7 @@ class SourceProcess:
         Maps view queries to relevant functions.
         """
         match json_api.query_type(request_dict):
-            case 'SELECT' | 'SELECT EXTRAPOLATED':
+            case 'SELECT' | 'SELECT FORECASTED':
                 self._select(request_dict, view)
             case 'DROP MATERIALIZED VIEW':
                 self._drop_view(request_dict, view)
@@ -155,14 +155,14 @@ class SourceProcess:
     @json_api.error_decorator
     def _select(self, request_dict: dict, view: MaterializedView):
         """
-        Executes SELECT or SELECT EXTRAPOLATED query.
+        Executes SELECT or SELECT FORECASTED query.
         """
         columns = json_api.columns(request_dict)
         where = json_api.select_where(request_dict, view.column_names)
         orderby_list = json_api.orderby(request_dict)
 
-        if json_api.query_type(request_dict) == 'SELECT EXTRAPOLATED':
-            # SELECT EXTRAPOLATED query
+        if json_api.query_type(request_dict) == 'SELECT FORECASTED':
+            # SELECT FORECASTED query
             extrapolation_timestamp = json_api.extrapolation_timestamp(request_dict)
             extrapolation_offset = json_api.extrapolation_offset(request_dict)
             rows = view.select_extrapolated(column_names=columns, where=where,

@@ -8,10 +8,10 @@ import psycopg2
 table_name = 'demo_table'
 
 
-def insert(connection, cursor):
+def insert(connection, cursor, a):
     generated_b = int(numpy.random.normal() * 10)
     generated_c = abs(numpy.random.normal() * 3)
-    cursor.execute(f'INSERT INTO {table_name} VALUES (round(random() * 5), {generated_b}, {generated_c})')
+    cursor.execute(f'INSERT INTO {table_name} VALUES ({a}, {generated_b}, {generated_c})')
     connection.commit()
 
 
@@ -38,8 +38,8 @@ connection.commit()
 
 #while True:
 for j in range(1000):
-    for i in range(10):
-        insert(connection, cursor)
+    for i in range(6):
+        insert(connection, cursor, i)
     #update(connection, cursor)
     #delete(connection, cursor)
     time.sleep(3)

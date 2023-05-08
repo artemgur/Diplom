@@ -16,7 +16,7 @@ def get_target(json_dict: dict) -> str:
         return 'source.' + view_source_name(json_dict)
     if query_type(json_dict) in ['DROP SOURCE']:
         return 'source.' + name(json_dict)
-    if query_type(json_dict) in ['SELECT', 'SELECT EXTRAPOLATED', 'DROP MATERIALIZED VIEW']:
+    if query_type(json_dict) in ['SELECT', 'SELECT FORECASTED', 'DROP MATERIALIZED VIEW']:
         return 'view.' + name(json_dict)
     # TODO
 
