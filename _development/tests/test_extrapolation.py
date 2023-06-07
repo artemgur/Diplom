@@ -3,13 +3,14 @@ import time
 from aggregate_functions import Sum, Max
 from aggregate_initializer import AggregateInitializer
 from materialized_view import MaterializedView
+from groups import GroupVAR, GroupExtrapolation
 
 
 base_time = 0.1
 
 
 groupby = MaterializedView('view1', groupby_columns=['a'], aggregate_initializers=[AggregateInitializer('b', Sum), AggregateInitializer('c', Max)],
-                           extrapolation=True, extrapolation_method='quintic')
+                           forecast=True, forecast_type=GroupVAR, extrapolation_method='quintic')
 groupby.insert({'a': 1, 'b': 1, 'c': 0})
 groupby.insert({'a': 2, 'b': -1, 'c': 0})
 for i in range(10):
@@ -18,4 +19,4 @@ for i in range(10):
     groupby.insert({'a': 2, 'b': -2, 'c': (i + 1) ** 3})
 time.sleep(base_time * 2)
 print(groupby)
-print(groupby.to_string_extrapolated())
+print(groupby.to_string_forecasted())

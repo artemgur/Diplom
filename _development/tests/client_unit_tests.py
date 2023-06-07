@@ -1,3 +1,4 @@
+import time
 import unittest
 
 import requests
@@ -22,6 +23,7 @@ drop_source = {'query_type': 'DROP SOURCE', 'name': 'test_source'}
 def start_main_decorator(func):
     def wrapper(*args, **kwargs):
         process = start_subprocess('python ../../main.py')
+        time.sleep(5)
         try:
             func(*args, **kwargs)
         finally:

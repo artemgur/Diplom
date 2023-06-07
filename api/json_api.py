@@ -7,6 +7,7 @@ import constants
 from api import select_where_parser, view_where_parser
 from orderby import OrderBy
 from utilities.empty_functions import empty_where_function
+import utilities.reflection
 
 
 def get_target(json_dict: dict) -> str:
@@ -37,7 +38,11 @@ def type(json_dict: dict) -> str:
 
 
 def parameters(json_dict: dict) -> dict:
-    return json_dict['parameters'] if 'parameters' in json_dict else {}
+    d = json_dict['parameters'] if 'parameters' in json_dict else {}
+    if 'extrapolation' in d:  # Temporary backwards compatibility
+        d['forecast'] = d['extrapolation']
+        del d['extrapolation']
+    return d
 
 
 def groupby_columns(json_dict: dict) -> list:
@@ -84,12 +89,12 @@ def view_where(json_dict: dict):
     return view_where_parser.parse(json_dict['where'])
 
 
-def extrapolation_timestamp(json_dict: dict):
-    return json_dict['extrapolation_timestamp'] if 'extrapolation_timestamp' in json_dict else None
+def forecast_timestamp(json_dict: dict):
+    return json_dict['forecast_timestamp'] if 'forecast_timestamp' in json_dict else None
 
 
-def extrapolation_offset(json_dict: dict):
-    return json_dict['extrapolation_offset'] if 'extrapolation_offset' in json_dict else None
+def forecast_offset(json_dict: dict):
+    return json_dict['forecast_offset'] if 'forecast_offset' in json_dict else None
 
 
 def orderby(json_dict: dict):
@@ -108,6 +113,11 @@ def orderby(json_dict: dict):
 
 def format(json_dict: dict):
     return json_dict['format'] if 'format' in json_dict else 'csv'
+
+
+def handle_forecast_type(parameters: dict):
+    if 'forecast_type' in parameters:
+        parameters['forecast_type'] = utilities.reflection.str_to_type('Group' + parameters['forecast_type'])
 
 
 

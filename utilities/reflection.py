@@ -4,6 +4,8 @@ import keyword
 from sources import *
 # noinspection PyUnresolvedReferences
 from aggregate_functions import *
+# noinspection PyUnresolvedReferences
+from groups import *
 
 
 def str_to_type(x: str):

@@ -1,11 +1,14 @@
 import time
 from collections import deque
+from datetime import datetime
 
 import numpy as np
-from scipy.interpolate import RegularGridInterpolator
 
 from aggregate_initializer import AggregateInitializer
-from group import Group
+from groups.group import Group
+
+from prophet import Prophet
+import pandas as pd
 
 
 extrapolation_method_min_points = {'linear': 0, 'slinear': 0, 'cubic': 4, 'quintic': 6, 'pchip': 4}
@@ -62,12 +65,27 @@ class GroupExtrapolation(Group):
         # If not enough values in history for extrapolation
         if len(self._aggregate_cache) < extrapolation_method_min_points[self._extrapolation_method]:
             return self._aggregate_cache[-1][:self._aggregates_count]
-
+        dates = list(map(datetime.utcfromtimestamp, self._aggregate_cache_timestamps))
+        #print(list(self._aggregate_cache))
+        #model = VAR(list(self._aggregate_cache), dates=dates)
+        #model.fit()
+        #print(model.predict(0, extrapolation_timestamp))
+        #return []
+        df = pd.DataFrame(data=self._aggregate_cache, columns=['y', 'z'])
+        df['ds'] = dates
+        print(df)
+        model = Prophet()
+        #model.add_regressor('z', standardize=False)
+        model.fit(df)
+        prediction = model.predict(pd.DataFrame(data=[datetime.utcfromtimestamp(extrapolation_timestamp)], columns=['ds']))
+        print(prediction)
+        print(prediction.columns)
+        return []
         # self._aggregate_cache and/or self._aggregate_cache_timestamps probably should be converted from deque to something else?
         #print(self._aggregate_cache)
-        interp = RegularGridInterpolator([self._aggregate_cache_timestamps, self._columns_index], self._aggregate_cache,
-                                         method=self._extrapolation_method, bounds_error=False, fill_value=None)
+        #interp = RegularGridInterpolator([self._aggregate_cache_timestamps, self._columns_index], self._aggregate_cache,
+        #                                 method=self._extrapolation_method, bounds_error=False, fill_value=None)
 
-        points_to_calculate = list(map(lambda x: (extrapolation_timestamp, x), self._columns_index))
-        extrapolated_row: np.ndarray = interp(points_to_calculate)
-        return extrapolated_row.tolist()[:self._aggregates_count]
+        #points_to_calculate = list(map(lambda x: (extrapolation_timestamp, x), self._columns_index))
+        #extrapolated_row: np.ndarray = interp(points_to_calculate)
+        #return extrapolated_row.tolist()[:self._aggregates_count]

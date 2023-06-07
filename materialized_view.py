@@ -1,4 +1,3 @@
-import time
 from collections import defaultdict
 from typing import Iterable
 
@@ -6,8 +5,10 @@ from tabulate import tabulate
 
 import constants
 from aggregate_initializer import AggregateInitializer
-from group import Group
-from group_extrapolation import GroupExtrapolation
+from groups.group import Group
+from groups import *
+from groups.group_extrapolation import GroupExtrapolation
+#from group_var import GroupVAR as GroupExtrapolation
 from orderby import OrderBy
 from utilities.empty_functions import empty_where_function
 import utilities.list
@@ -22,7 +23,7 @@ class MaterializedView:
                  where=empty_where_function,
                  append_only=False,
                  column_aliases=None,
-                 extrapolation=False, extrapolation_method='linear', extrapolation_cache_size=100):
+                 forecast=False, forecast_type=GroupExtrapolation, extrapolation_method='linear', extrapolation_cache_size=100):
 
         if column_aliases is None:
             column_aliases = []
@@ -31,12 +32,12 @@ class MaterializedView:
 
         self._aggregate_initializers = aggregate_initializers
         self._append_only = append_only
-        self._extrapolation = extrapolation
+        self._extrapolation = forecast
         self._extrapolation_method = extrapolation_method
         self._extrapolation_cache_size = extrapolation_cache_size
         self._groupby_rows = defaultdict(lambda: Group(aggregate_initializers, append_only=append_only)) if not self._extrapolation else \
-            defaultdict(lambda: GroupExtrapolation(aggregate_initializers, append_only=append_only,
-                                                   extrapolation_method=self._extrapolation_method, cache_size=self._extrapolation_cache_size))
+            defaultdict(lambda: forecast_type(aggregate_initializers, append_only=append_only,
+                                              extrapolation_method=self._extrapolation_method, cache_size=self._extrapolation_cache_size))
         self._groupby_columns = groupby_columns
         self._where = where
         self._column_aliases = self._determine_column_aliases(column_aliases)
@@ -77,15 +78,15 @@ class MaterializedView:
             yield list(key) + value.get_result()
 
 
-    def _extrapolate(self, extrapolation_timestamp=None, extrapolation_offset=None):
+    def _forecast(self, extrapolation_timestamp=None, extrapolation_offset=None):
         if not self._extrapolation:
-            raise ValueError('Attempted to extrapolate a groupby in which extrapolation is not enabled')
+            raise ValueError('Attempted to forecast a groupby in which forecasting is not enabled')
         for key, value in self._groupby_rows.items():
             # noinspection PyUnresolvedReferences
-            yield list(key) + value.extrapolate(extrapolation_timestamp=extrapolation_timestamp, extrapolation_offset=extrapolation_offset)
+            yield list(key) + value.forecast(forecast_timestamp=extrapolation_timestamp, forecast_offset=extrapolation_offset)
 
-    def to_string_extrapolated(self, extrapolation_timestamp=None):
-        return tabulate(self._extrapolate(extrapolation_timestamp), headers=self.column_names, tablefmt=constants.TABULATE_FORMAT)
+    def to_string_forecasted(self, extrapolation_timestamp=None):
+        return tabulate(self._forecast(extrapolation_timestamp), headers=self.column_names, tablefmt=constants.TABULATE_FORMAT)
 
 
     @property
@@ -140,8 +141,8 @@ class MaterializedView:
     def select(self, column_names=None, where=empty_where_function) -> Iterable:
         return self._select(self.get_rows(), column_names, where)
 
-    def select_extrapolated(self, column_names=None, where=empty_where_function, extrapolation_timestamp=None, extrapolation_offset=None) -> Iterable:
-        rows = self._extrapolate(extrapolation_timestamp=extrapolation_timestamp, extrapolation_offset=extrapolation_offset)
+    def select_forecasted(self, column_names=None, where=empty_where_function, forecast_timestamp=None, forecast_offset=None) -> Iterable:
+        rows = self._forecast(extrapolation_timestamp=forecast_timestamp, extrapolation_offset=forecast_offset)
         return self._select(rows, column_names, where)
 
 

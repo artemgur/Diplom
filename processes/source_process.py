@@ -9,6 +9,7 @@ import rows_formatter
 import utilities.list
 
 
+
 def start_source_process(source: Source, queries_dict: dict, responses_dict: dict, view_names: dict):
     source_process = SourceProcess(source, queries_dict, responses_dict, view_names)
     source_process.run()
@@ -115,6 +116,7 @@ class SourceProcess:
         parameters = json_api.parameters(request_dict)
         column_aliases = json_api.column_aliases(request_dict)
         aggregate_initializers = json_api.aggregate_initializers(request_dict)
+        json_api.handle_forecast_type(parameters)
         view = MaterializedView(name=name, groupby_columns=groupby_columns, aggregate_initializers=aggregate_initializers,
                                 where=where, column_aliases=column_aliases, **parameters)
         self._view_names[name] = 1
@@ -163,10 +165,10 @@ class SourceProcess:
 
         if json_api.query_type(request_dict) == 'SELECT FORECASTED':
             # SELECT FORECASTED query
-            extrapolation_timestamp = json_api.extrapolation_timestamp(request_dict)
-            extrapolation_offset = json_api.extrapolation_offset(request_dict)
-            rows = view.select_extrapolated(column_names=columns, where=where,
-                                            extrapolation_timestamp=extrapolation_timestamp, extrapolation_offset=extrapolation_offset)
+            forecast_timestamp = json_api.forecast_timestamp(request_dict)
+            forecast_offset = json_api.forecast_offset(request_dict)
+            rows = view.select_forecasted(column_names=columns, where=where,
+                                          forecast_timestamp=forecast_timestamp, forecast_offset=forecast_offset)
         else:
             # SELECT query
             rows = view.select(column_names=columns, where=where)
